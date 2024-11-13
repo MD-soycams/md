@@ -5,94 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mighty David 7th Raffle Bonanza</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f8f8;
-            text-align: center;
-        }
-        .container {
-            width: 80%;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+        /* Add your styling here */
         .slot {
-            margin: 5px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
             display: inline-block;
+            padding: 10px;
+            margin: 5px;
+            background-color: lightblue;
+            border: 1px solid #ccc;
             cursor: pointer;
         }
+
         .selected {
-            background-color: #4CAF50;
-            color: white;
+            background-color: yellow;
         }
+
         .occupied {
-            background-color: #888;
-            color: white;
-            cursor: not-allowed;
-        }
-        .button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .status {
-            color: green;
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
+            background-color: gray;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Mighty David 7th Raffle Bonanza</h1>
-    <p>Draw Date: December 1st, 2024 (Thanksgiving Party)</p>
-    <h2>Prizes</h2>
-    <ul>
-        <li>1st Prize: 1000 AED</li>
-        <li>2nd Prize: 300 AED</li>
-        <li>2 Consolation Prizes: 100 AED each</li>
-    </ul>
+    <h2>Mighty David 7th Raffle Bonanza</h2>
 
-    <h3>Total Slots Available: 100</h3>
-    <h3>50 AED per slot</h3>
+    <label for="nameInput">Enter your Name:</label>
+    <input type="text" id="nameInput" placeholder="Your Name" />
 
-    <div id="slotsContainer">
-        <!-- Slots will be dynamically added here -->
+    <div id="slotsContainer"></div>
+
+    <div>
+        <p>Selected Slots: <span id="selectedCount">0</span></p>
+        <p>Total Amount: <span id="totalAmount">0</span> AED</p>
     </div>
 
-    <h3>Selected Slots: <span id="selectedCount">0</span></h3>
-    <h3>Total Payment: <span id="totalAmount">0</span> AED</h3>
-
-    <input type="text" id="nameInput" placeholder="Enter your name">
     <button class="button" onclick="submitForm()">Submit</button>
 
     <div id="statusMessage"></div>
-
     <h3>Participants List:</h3>
     <table id="participantsTable">
         <thead>
@@ -108,7 +58,6 @@
     </table>
 </div>
 
-<!-- Moved the script tag to the bottom -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
