@@ -3,236 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raffle Slot Selection</title>
+    <title>Mighty David 7th Raffle Bonanza</title>
     <style>
-        #slotsContainer {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .slot {
-            border: 1px solid #000;
-            padding: 10px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
             text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .slot {
+            margin: 5px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            display: inline-block;
             cursor: pointer;
-            user-select: none;
-            font-size: 14px;
         }
-
-        .slot.selected {
-            background-color: #90ee90;
-            font-weight: bold;
+        .selected {
+            background-color: #4CAF50;
+            color: white;
         }
-
-        .slot.disabled {
-            background-color: #ccc;
+        .occupied {
+            background-color: #888;
+            color: white;
             cursor: not-allowed;
         }
-
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            color: green;
+        }
         table {
             width: 100%;
-            border-collapse: collapse;
             margin-top: 20px;
+            border-collapse: collapse;
         }
-
-        table, th, td {
-            border: 1px solid #000;
-        }
-
         th, td {
-            padding: 10px;
+            padding: 8px;
             text-align: left;
-            font-size: 14px;
+            border-bottom: 1px solid #ddd;
         }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            #slotsContainer {
-                grid-template-columns: repeat(5, 1fr); /* Adjust grid to fit mobile screens */
-            }
-
-            .slot {
-                padding: 8px;
-                font-size: 12px;
-            }
-
-            th, td {
-                font-size: 12px;
-                padding: 8px;
-            }
+        th {
+            background-color: #4CAF50;
+            color: white;
         }
     </style>
 </head>
 <body>
 
-    <h1>Raffle Slot Selection</h1>
-    <div id="slotsContainer"></div>
+<div class="container">
+    <h1>Mighty David 7th Raffle Bonanza</h1>
+    <p>Draw Date: December 1st, 2024 (Thanksgiving Party)</p>
+    <h2>Prizes</h2>
+    <ul>
+        <li>1st Prize: 1000 AED</li>
+        <li>2nd Prize: 300 AED</li>
+        <li>2 Consolation Prizes: 100 AED each</li>
+    </ul>
 
-    <form onsubmit="event.preventDefault(); submitForm();">
-        <input type="text" id="nameInput" placeholder="Enter your name" required />
-        <button type="submit">Submit</button>
-    </form>
+    <h3>Total Slots Available: 100</h3>
+    <h3>50 AED per slot</h3>
 
-    <h3>Summary</h3>
-    <p>Selected Slots: <span id="selectedCount">0</span></p>
-    <p>Total Amount: <span id="totalAmount">0</span> AED</p>
+    <div id="slotsContainer">
+        <!-- Slots will be dynamically added here -->
+    </div>
 
-    <h3>Selections</h3>
-    <table>
+    <h3>Selected Slots: <span id="selectedCount">0</span></h3>
+    <h3>Total Payment: <span id="totalAmount">0</span> AED</h3>
+
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button class="button" onclick="submitForm()">Submit</button>
+
+    <div id="statusMessage"></div>
+
+    <h3>Participants List:</h3>
+    <table id="participantsTable">
         <thead>
             <tr>
-                <th>Slots</th>
+                <th>Slot Numbers</th>
                 <th>Name</th>
-                <th>Total Amount</th>
+                <th>Total to Pay (AED)</th>
             </tr>
         </thead>
-        <tbody id="selectionsTableBody"></tbody>
+        <tbody>
+            <!-- Participants will be displayed here -->
+        </tbody>
     </table>
+</div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  const firebaseConfig = {
-      apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
-      authDomain: "md-raffle.firebaseapp.com",
-      databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
-      projectId: "md-raffle",
-      storageBucket: "md-raffle.appspot.com",
-      messagingSenderId: "469756144780",
-      appId: "1:469756144780:web:b2892c0e3808628d429fa9",
-      measurementId: "G-KHQBQ730PG"
-  };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
+        authDomain: "md-raffle.firebaseapp.com",
+        databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
+        projectId: "md-raffle",
+        storageBucket: "md-raffle.firebasestorage.app",
+        messagingSenderId: "469756144780",
+        appId: "1:469756144780:web:b2892c0e3808628d429fa9",
+        measurementId: "G-KHQBQ730PG"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const slotsRef = ref(db, 'slots');
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db);
 
-  const totalSlots = 100;
-  const slotPrice = 50;
-  let selectedSlots = [];
-  let allSelections = {};
+    const totalSlots = 100;
+    const slotPrice = 50;
+    let selectedSlots = [];
+    let users = [];
 
-  function createSlots() {
-      const slotsContainer = document.getElementById('slotsContainer');
-      slotsContainer.innerHTML = '';
-      for (let i = 1; i <= totalSlots; i++) {
-          const slot = document.createElement('div');
-          slot.classList.add('slot');
-          slot.textContent = i;
-          slot.dataset.slotNumber = i;
-          slot.addEventListener('click', () => toggleSlotSelection(i));
-          slotsContainer.appendChild(slot);
-      }
-      syncSlotsWithFirebase();
-  }
+    // Function to generate slots
+    function createSlots() {
+        const slotsContainer = document.getElementById('slotsContainer');
+        for (let i = 1; i <= totalSlots; i++) {
+            const slot = document.createElement('div');
+            slot.classList.add('slot');
+            slot.textContent = i;
+            slot.setAttribute('data-slot', i);
+            slot.onclick = function () {
+                toggleSlotSelection(i);
+            };
+            slotsContainer.appendChild(slot);
+        }
+    }
 
-  function syncSlotsWithFirebase() {
-      onValue(slotsRef, (snapshot) => {
-          allSelections = snapshot.val() || {};
-          updateUIFromFirebase();
-      });
-  }
+    // Toggle slot selection
+    function toggleSlotSelection(slotNumber) {
+        if (selectedSlots.includes(slotNumber)) {
+            selectedSlots = selectedSlots.filter(s => s !== slotNumber);
+            document.querySelector(`[data-slot="${slotNumber}"]`).classList.remove('selected');
+        } else {
+            if (selectedSlots.length < 5) {  // Max 5 slots
+                selectedSlots.push(slotNumber);
+                document.querySelector(`[data-slot="${slotNumber}"]`).classList.add('selected');
+            } else {
+                alert('You can only select up to 5 slots!');
+            }
+        }
+        updateSummary();
+    }
 
-  function updateUIFromFirebase() {
-      const slotsContainer = document.getElementById('slotsContainer');
-      const slots = slotsContainer.querySelectorAll('.slot');
+    // Update selected slots and total amount
+    function updateSummary() {
+        document.getElementById('selectedCount').textContent = selectedSlots.length;
+        document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
+    }
 
-      slots.forEach(slot => {
-          const slotNumber = slot.dataset.slotNumber;
-          const selection = allSelections[slotNumber];
-          if (selection) {
-              slot.textContent = `${slotNumber}. ${selection.name}`;
-              slot.classList.add('disabled');
-              slot.classList.remove('selected');
-              slot.removeEventListener('click', toggleSlotSelection);
-          } else {
-              slot.classList.remove('disabled');
-              slot.textContent = slotNumber;
-          }
-      });
-      updateSelectionsTable();
-  }
+    // Submit form with name and selected slots
+    async function submitForm() {
+        const name = document.getElementById('nameInput').value;
+        if (name === "") {
+            alert("Please enter your name.");
+            return;
+        }
 
-  function toggleSlotSelection(slotNumber) {
-      const slotElement = document.querySelector(`.slot[data-slot-number="${slotNumber}"]`);
-      if (slotElement.classList.contains('disabled')) return;
+        if (selectedSlots.length === 0) {
+            alert("Please select at least one slot.");
+            return;
+        }
 
-      if (selectedSlots.includes(slotNumber)) {
-          selectedSlots = selectedSlots.filter(num => num !== slotNumber);
-          slotElement.classList.remove('selected');
-      } else {
-          selectedSlots.push(slotNumber);
-          slotElement.classList.add('selected');
-      }
+        // Save the user data to Firebase
+        const userRef = ref(db, 'users/' + name);
+        await set(userRef, {
+            name: name,
+            slots: selectedSlots,
+            totalAmount: selectedSlots.length * slotPrice
+        });
 
-      updateSummary();
-  }
+        // Update the displayed participants list
+        updateParticipantsList();
 
-  function updateSummary() {
-      document.getElementById('selectedCount').textContent = selectedSlots.length;
-      document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
-  }
+        // Disable selected slots and mark them
+        selectedSlots.forEach(slot => {
+            document.querySelector(`[data-slot="${slot}"]`).classList.add('occupied');
+        });
 
-  function submitForm() {
-      const name = document.getElementById('nameInput').value.trim();
-      if (!name || selectedSlots.length === 0) {
-          alert("Please enter a name and select at least one slot.");
-          return;
-      }
+        // Reset selection and update summary
+        selectedSlots = [];
+        updateSummary();
+        document.getElementById('nameInput').value = "";
+    }
 
-      selectedSlots.forEach(slotNumber => {
-          set(ref(db, `slots/${slotNumber}`), {
-              name: name,
-              amount: slotPrice
-          });
-      });
+    // Update the participants table
+    function updateParticipantsList() {
+        const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';  // Clear existing rows
 
-      alert(`${name}'s slots saved!`);
+        // Fetch all participants from Firebase
+        get(child(dbRef, 'users')).then(snapshot => {
+            if (snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    const data = childSnapshot.val();
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `<td>${data.slots.join(', ')}</td><td>${data.name}</td><td>${data.totalAmount} AED</td>`;
+                });
+            }
+        }).catch(error => {
+            console.error("Error fetching participants data:", error);
+        });
+    }
 
-      resetSelection();
-  }
-
-  function resetSelection() {
-      selectedSlots = [];
-      updateSummary();
-      createSlots(); // Reload UI
-  }
-
-  function updateSelectionsTable() {
-      const tableBody = document.getElementById('selectionsTableBody');
-      tableBody.innerHTML = '';
-      const groupedData = {};
-
-      Object.entries(allSelections).forEach(([slot, data]) => {
-          if (!groupedData[data.name]) {
-              groupedData[data.name] = {
-                  slots: [],
-                  totalAmount: 0
-              };
-          }
-          groupedData[data.name].slots.push(slot);
-          groupedData[data.name].totalAmount += data.amount;
-      });
-
-      Object.entries(groupedData).forEach(([name, details]) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-              <td>${details.slots.join(', ')}</td>
-              <td>${name}</td>
-              <td>${details.totalAmount} AED</td>
-          `;
-          tableBody.appendChild(row);
-      });
-  }
-
-  window.onload = createSlots;
+    // Initialize page
+    createSlots();
+    updateParticipantsList();  // Load the initial participants list from Firebase
 </script>
-    
+
 </body>
 </html>
