@@ -31,10 +31,15 @@
             background-color: #f1f1f1;
             border-radius: 5px;
             cursor: pointer;
+            text-align: center;
         }
         .selected {
             background-color: #4CAF50;
             color: white;
+        }
+        .disabled {
+            background-color: #d3d3d3;
+            pointer-events: none;
         }
         .button {
             padding: 10px 20px;
@@ -91,9 +96,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Slot Number</th>
+                        <th>Slots</th>
                         <th>Name</th>
-                        <th>Amount (AED)</th>
+                        <th>Total Amount (AED)</th>
                     </tr>
                 </thead>
                 <tbody id="selectionsTableBody"></tbody>
@@ -105,6 +110,7 @@
         const totalSlots = 100;
         const slotPrice = 50;
         let selectedSlots = [];
+        let allSelections = [];
 
         function createSlots() {
             const slotsContainer = document.getElementById('slotsContainer');
@@ -118,15 +124,13 @@
         }
 
         function toggleSlotSelection(slotNumber) {
-            const slotIndex = selectedSlots.findIndex(slot => slot.number === slotNumber);
-            const slotElement = document.querySelector(`.slot:nth-child(${slotNumber})`);
-            if (slotIndex === -1) {
-                selectedSlots.push({ number: slotNumber, name: '' });
-                slotElement.classList.add('selected');
+            if (selectedSlots.includes(slotNumber)) {
+                selectedSlots = selectedSlots.filter(num => num !== slotNumber);
             } else {
-                selectedSlots.splice(slotIndex, 1);
-                slotElement.classList.remove('selected');
+                selectedSlots.push(slotNumber);
             }
+
+            document.querySelectorAll('.slot')[slotNumber - 1].classList.toggle('selected');
             updateSummary();
         }
 
@@ -137,12 +141,24 @@
 
         function submitForm() {
             const name = document.getElementById('nameInput').value.trim();
-            if (!name) {
-                alert("Please enter a name.");
+            if (!name || selectedSlots.length === 0) {
+                alert("Please enter a name and select at least one slot.");
                 return;
             }
 
-            selectedSlots.forEach(slot => slot.name = name);
+            selectedSlots.forEach(slotNumber => {
+                document.querySelectorAll('.slot')[slotNumber - 1].textContent = `${slotNumber}. ${name}`;
+                document.querySelectorAll('.slot')[slotNumber - 1].classList.add('disabled');
+                document.querySelectorAll('.slot')[slotNumber - 1].classList.remove('selected');
+            });
+
+            const totalAmount = selectedSlots.length * slotPrice;
+            allSelections.push({
+                slots: selectedSlots.join(', '),
+                name: name,
+                amount: totalAmount
+            });
+
             updateSelectionsTable();
             resetSelection();
         }
@@ -150,18 +166,17 @@
         function resetSelection() {
             selectedSlots = [];
             updateSummary();
-            document.querySelectorAll('.slot').forEach(slot => slot.classList.remove('selected'));
         }
 
         function updateSelectionsTable() {
             const tableBody = document.getElementById('selectionsTableBody');
             tableBody.innerHTML = '';
-            selectedSlots.forEach(slot => {
+            allSelections.forEach(selection => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${slot.number}</td>
-                    <td>${slot.name}</td>
-                    <td>${slotPrice}</td>
+                    <td>${selection.slots}</td>
+                    <td>${selection.name}</td>
+                    <td>${selection.amount} AED</td>
                 `;
                 tableBody.appendChild(row);
             });
