@@ -23,7 +23,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Header and logo styling */
+        /* Header and image styling */
         h1 {
             font-size: 36px;
             font-weight: bold;
@@ -55,8 +55,8 @@
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            width: 80px; /* Smaller width */
-            height: 40px; /* Smaller height */
+            width: 80px;
+            height: 40px;
             box-sizing: border-box;
             border-radius: 5px;
             font-size: 12px;
@@ -81,7 +81,7 @@
         /* Grid layout for 5 slots per column */
         .slots-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 columns */
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             padding: 20px 0;
             max-width: 100%;
@@ -141,20 +141,19 @@
             border: 1px solid #ccc;
         }
 
-        /* Logo styling */
-        .logo {
-            max-width: 120px;  /* Ensures the logo is not too large */
-            position: absolute;
-            top: 20px;
-            left: 20px;
+        /* Image styling */
+        .banner-image {
+            max-width: 100%;  /* Makes the image responsive */
+            height: auto;     /* Maintains aspect ratio */
+            margin-bottom: 20px; /* Adds some space below the image */
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Logo Image -->
-    <img src="https://app.gemoo.com/share/image-annotation/715453896404959232?codeId=v6xw9EXwJ6Gbz&origin=imageurlgenerator&card=715453893875793920" alt="Logo" class="logo">
+    <!-- Replace the logo with a normal image -->
+    <img src="MD-logo-09.jpg" alt="Raffle Banner" class="banner-image">
 
     <h1>Mighty David 7th Raffle Bonanza</h1>
 
@@ -263,19 +262,15 @@
             if (selectedSlots.length < 5) {  // Max 5 slots
                 selectedSlots.push(slotNumber);
                 document.querySelector(`[data-slot="${slotNumber}"]`).classList.add('selected');
-            } else {
-                alert('You can only select up to 5 slots!');
             }
         }
         updateSlotInfo();
     }
 
-    // Update slot info
+    // Update selected slots info
     function updateSlotInfo() {
-        const selectedCount = document.getElementById('selectedCount');
-        const totalAmount = document.getElementById('totalAmount');
-        selectedCount.textContent = selectedSlots.length;
-        totalAmount.textContent = selectedSlots.length * slotPrice;
+        document.getElementById('selectedCount').textContent = selectedSlots.length;
+        document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
     }
 
     // Handle submit
