@@ -77,6 +77,9 @@
             background-color: #f44336;
             color: white;
         }
+        #selectedList {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +107,10 @@
         <button class="button" onclick="submitForm()">Submit</button>
 
         <div id="statusMessage"></div>
+
+        <!-- Display list of selected slots and payment info -->
+        <h3>Selected Slots and Payment Information</h3>
+        <div id="selectedList"></div>
 
         <!-- Table for tracking selections -->
         <h3>Selected Slots and Payment Information</h3>
@@ -166,11 +173,11 @@
 
         // Toggle slot selection
         function toggleSlotSelection(slotNumber) {
-            const index = selectedSlots.indexOf(slotNumber);
+            const index = selectedSlots.findIndex(slot => slot.number === slotNumber);
             const slotElement = document.querySelector(`[data-slot="${slotNumber}"]`);
             
             if (index === -1) {
-                selectedSlots.push(slotNumber);
+                selectedSlots.push({ number: slotNumber, name: '' });
                 slotElement.classList.add('selected');
             } else {
                 selectedSlots.splice(index, 1);
@@ -198,17 +205,22 @@
                 return;
             }
 
-            users.push({ name: name, slots: selectedSlots });
+            // Assign the player's name to the selected slots
+            selectedSlots.forEach(slot => {
+                slot.name = name;
+            });
+
             updateStatusMessage(name);
             resetSelection();
             updateSelectionTable(name);
+            updateSelectedList();
             saveSelectionToFirestore(name);
         }
 
         // Show payment status
         function updateStatusMessage(name) {
             const statusMessage = document.getElementById('statusMessage');
-            statusMessage.innerHTML = `<p class="status">User ${name} has selected slots: ${selectedSlots.join(', ')}. Please pay ${selectedSlots.length * slotPrice} AED.</p>`;
+            statusMessage.innerHTML = `<p class="status">User ${name} has selected slots: ${selectedSlots.map(slot => `${slot.number}. ${slot.name}`).join(', ')}. Please pay ${selectedSlots.length * slotPrice} AED.</p>`;
         }
 
         // Reset selection after submission
@@ -223,11 +235,11 @@
             selectedSlots.forEach(slot => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${slot}</td>
-                    <td>${name}</td>
+                    <td>${slot.number}</td>
+                    <td>${slot.name}</td>
                     <td>${slotPrice}</td>
-                    <td><button class="paid-button" onclick="updatePaymentStatus('${name}', ${slot}, true)">Paid</button> 
-                    <button class="unpaid-button" onclick="updatePaymentStatus('${name}', ${slot}, false)">Unpaid</button></td>
+                    <td><button class="paid-button" onclick="updatePaymentStatus('${slot.name}', ${slot.number}, true)">Paid</button> 
+                    <button class="unpaid-button" onclick="updatePaymentStatus('${slot.name}', ${slot.number}, false)">Unpaid</button></td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -235,35 +247,4 @@
 
         // Update payment status in table
         function updatePaymentStatus(name, slot, status) {
-            const tableBody = document.querySelector('#selectionTable tbody');
-            for (let row of tableBody.rows) {
-                const slotCell = row.cells[0];
-                const playerNameCell = row.cells[1];
-                if (slotCell.textContent == slot && playerNameCell.textContent == name) {
-                    const statusButton = row.querySelector(status ? '.paid-button' : '.unpaid-button');
-                    statusButton.textContent = status ? 'Paid' : 'Unpaid';
-                    statusButton.classList.toggle('paid-button', status);
-                    statusButton.classList.toggle('unpaid-button', !status);
-                }
-            }
-        }
-
-        // Save the selection to Firestore
-        function saveSelectionToFirestore(name) {
-            db.collection("raffleEntries").add({
-                name: name,
-                slots: selectedSlots,
-                totalAmount: selectedSlots.length * slotPrice,
-                status: "Unpaid"
-            }).then(() => {
-                console.log("Entry saved to Firestore!");
-            }).catch((error) => {
-                console.error("Error adding document: ", error);
-            });
-        }
-
-        // Call createSlots function when the page loads
-        window.onload = createSlots;
-    </script>
-</body>
-</html>
+            const table
