@@ -59,6 +59,7 @@
             box-sizing: border-box;
             border-radius: 5px;
             font-size: 18px;
+            text-align: center;
         }
 
         .slot:hover {
@@ -76,12 +77,14 @@
             color: #fff;
         }
 
-        /* Responsive grid layout for slots */
+        /* Grid layout for 10 slots per column */
         .slots-container {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
+            grid-template-columns: repeat(10, 1fr); /* 10 columns */
             gap: 10px;
             padding: 20px 0;
+            max-width: 100%;
+            justify-content: center;
         }
 
         /* Form and table styling */
@@ -142,7 +145,7 @@
 
 <div class="container">
     <!-- Logo Image -->
-    <img src="MD-logo-09.jpg" alt="Logo" style="max-width: 150px; position: absolute; top: 20px; left: 20px;">
+    <img src="file:///C:/Users/97152/Downloads/MD-logo-09.jpg" alt="Logo" style="max-width: 150px; position: absolute; top: 20px; left: 20px;">
 
     <h1>Mighty David 7th Raffle Bonanza</h1>
 
@@ -268,21 +271,19 @@
     async function submitForm() {
         const name = document.getElementById('nameInput').value;
         if (name === "") {
-            alert("Please enter your name.");
+            alert("Please enter your name!");
             return;
         }
-
         if (selectedSlots.length === 0) {
-            alert("Please select at least one slot.");
+            alert("Please select at least one slot!");
             return;
         }
 
+        // Store user data in Firebase
         const userRef = ref(db, 'users/' + name);
         const userData = {
             name: name,
-            slots: selectedSlots.join(", "),
-            totalAmount: selectedSlots.length * slotPrice,
-            paid: 'No'
+            slots: selectedSlots
         };
 
         await set(userRef, userData);
@@ -315,5 +316,6 @@
     // Initialize the page
     createSlots();
 </script>
+
 </body>
 </html>
