@@ -60,7 +60,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
@@ -133,26 +133,54 @@
             return;
         }
 
-        // Save the user data to Firebase
         const userRef = ref(db, 'users/' + name);
-        await set(userRef, {
-            name: name,
-            slots: selectedSlots,
-            totalAmount: selectedSlots.length * slotPrice
+
+        // Fetch the existing user data (if any)
+        get(userRef).then(snapshot => {
+            if (snapshot.exists()) {
+                // If user already exists, update their data
+                const existingData = snapshot.val();
+                const updatedSlots = [...new Set([...existingData.slots, ...selectedSlots])]; // Merge and deduplicate
+                const updatedAmount = updatedSlots.length * slotPrice;
+
+                update(userRef, {
+                    slots: updatedSlots,
+                    totalAmount: updatedAmount
+                }).then(() => {
+                    // Successfully updated, now update the participants list
+                    updateParticipantsList();
+                }).catch(error => {
+                    console.error("Error updating data:", error);
+                });
+            } else {
+                // If user does not exist, create a new entry
+                const totalAmount = selectedSlots.length * slotPrice;
+                set(userRef, {
+                    name: name,
+                    slots: selectedSlots,
+                    totalAmount: totalAmount
+                }).then(() => {
+                    // Successfully added, now update the participants list
+                    updateParticipantsList();
+                }).catch(error => {
+                    console.error("Error writing new data:", error);
+                });
+            }
+
+            // Disable selected slots and mark them with the name
+            selectedSlots.forEach(slot => {
+                const slotElement = document.querySelector(`[data-slot="${slot}"]`);
+                slotElement.classList.add('occupied');
+                slotElement.textContent = `${slot} ${name}`;  // Update the slot text
+            });
+
+            // Reset selection and update summary
+            selectedSlots = [];
+            updateSummary();
+            document.getElementById('nameInput').value = "";
+        }).catch(error => {
+            console.error("Error fetching data:", error);
         });
-
-        // Update the displayed participants list
-        updateParticipantsList();
-
-        // Disable selected slots and mark them
-        selectedSlots.forEach(slot => {
-            document.querySelector(`[data-slot="${slot}"]`).classList.add('occupied');
-        });
-
-        // Reset selection and update summary
-        selectedSlots = [];
-        updateSummary();
-        document.getElementById('nameInput').value = "";
     }
 
     // Update the participants table
