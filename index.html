@@ -23,7 +23,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Header and image styling */
+        /* Header styling */
         h1 {
             font-size: 36px;
             font-weight: bold;
@@ -55,12 +55,13 @@
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            width: 80px;
+            width: 70px; /* Adjusted to make the slot smaller */
             height: 40px;
             box-sizing: border-box;
             border-radius: 5px;
             font-size: 12px;
             text-align: center;
+            white-space: nowrap; /* Prevents overflow of text */
         }
 
         .slot:hover {
@@ -78,7 +79,7 @@
             color: #fff;
         }
 
-        /* Grid layout for 5 slots per column */
+        /* Grid layout for 5 slots per row */
         .slots-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -86,6 +87,7 @@
             padding: 20px 0;
             max-width: 100%;
             justify-content: center;
+            overflow-x: auto; /* Prevents overflow */
         }
 
         /* Form and table styling */
@@ -141,20 +143,11 @@
             border: 1px solid #ccc;
         }
 
-        /* Image styling */
-        .banner-image {
-            max-width: 100%;  /* Makes the image responsive */
-            height: auto;     /* Maintains aspect ratio */
-            margin-bottom: 20px; /* Adds some space below the image */
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Replace the logo with a normal image -->
-    <img src="MD-logo-09.jpg" alt="Raffle Banner" class="banner-image">
-
     <h1>Mighty David 7th Raffle Bonanza</h1>
 
     <div class="prizes-info">
