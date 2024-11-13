@@ -5,35 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mighty David 7th Raffle Bonanza</title>
     <style>
-        /* Add your styling here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Main container */
+        .container {
+            text-align: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header and logo styling */
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .prizes-info {
+            background-color: #2980b9;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .prizes-info h3 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        /* Slot styling */
         .slot {
             display: inline-block;
-            padding: 10px;
+            padding: 15px;
             margin: 5px;
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
+            width: calc(10% - 10px);
+            box-sizing: border-box;
+            border-radius: 5px;
+            font-size: 18px;
         }
 
-        .selected {
+        .slot:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .slot.selected {
             background-color: yellow;
         }
 
-        .occupied {
+        .slot.occupied {
             background-color: gray;
             pointer-events: none;
+            color: #fff;
+        }
+
+        /* Responsive grid layout for slots */
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            padding: 20px 0;
+        }
+
+        /* Form and table styling */
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Participants Table */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        td {
+            background-color: #ecf0f1;
+        }
+
+        select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Mighty David 7th Raffle Bonanza</h2>
+    <!-- Logo Image -->
+    <img src="MD-logo-09.jpg" alt="Logo" style="max-width: 150px; position: absolute; top: 20px; left: 20px;">
+
+    <h1>Mighty David 7th Raffle Bonanza</h1>
+
+    <div class="prizes-info">
+        <h3>PRIZES:</h3>
+        <p>1st Prize: 1000 AED</p>
+        <p>2nd Prize: 300 AED</p>
+        <p>2 Consolation Prizes: 100 AED</p>
+        <p>Total Slots - 100</p>
+        <p>50 AED per slot = 5000 AED</p>
+        <p>Prizes = 1500 AED</p>
+        <p>MD Funds = 3500 AED</p>
+    </div>
 
     <label for="nameInput">Enter your Name:</label>
     <input type="text" id="nameInput" placeholder="Your Name" />
 
-    <div id="slotsContainer"></div>
+    <div class="slots-container" id="slotsContainer"></div>
 
     <div>
         <p>Selected Slots: <span id="selectedCount">0</span></p>
@@ -50,6 +177,7 @@
                 <th>Slot Numbers</th>
                 <th>Name</th>
                 <th>Total to Pay (AED)</th>
+                <th>Payment Status</th>
             </tr>
         </thead>
         <tbody>
@@ -150,86 +278,42 @@
         }
 
         const userRef = ref(db, 'users/' + name);
+        const userData = {
+            name: name,
+            slots: selectedSlots.join(", "),
+            totalAmount: selectedSlots.length * slotPrice,
+            paid: 'No'
+        };
 
-        // Fetch the existing user data (if any)
-        get(userRef).then(snapshot => {
-            if (snapshot.exists()) {
-                // If user already exists, update their data
-                const existingData = snapshot.val();
-                const updatedSlots = [...new Set([...existingData.slots, ...selectedSlots])]; // Merge and deduplicate
-                const updatedAmount = updatedSlots.length * slotPrice;
+        await set(userRef, userData);
 
-                update(userRef, {
-                    slots: updatedSlots,
-                    totalAmount: updatedAmount
-                }).then(() => {
-                    // Successfully updated, now update the participants list
-                    updateParticipantsList();
-                }).catch(error => {
-                    console.error("Error updating data:", error);
-                });
-            } else {
-                // If user does not exist, create a new entry
-                const totalAmount = selectedSlots.length * slotPrice;
-                set(userRef, {
-                    name: name,
-                    slots: selectedSlots,
-                    totalAmount: totalAmount
-                }).then(() => {
-                    // Successfully added, now update the participants list
-                    updateParticipantsList();
-                }).catch(error => {
-                    console.error("Error writing new data:", error);
-                });
-            }
-
-            // Save the slot state to Firebase as occupied
-            selectedSlots.forEach(slot => {
-                const slotElement = document.querySelector(`[data-slot="${slot}"]`);
-                slotElement.classList.add('occupied');
-                slotElement.textContent = `${slot} ${name}`;  // Update the slot text in UI
-
-                // Save slot to Firebase as occupied
-                const slotRef = ref(db, 'slots/' + slot);
-                set(slotRef, name);
-            });
-
-            // Reset selection and update summary
-            selectedSlots = [];
-            updateSummary();
-            document.getElementById('nameInput').value = "";
-        }).catch(error => {
-            console.error("Error fetching data:", error);
+        // Update slots as occupied in Firebase
+        selectedSlots.forEach(async slot => {
+            const slotRef = ref(db, 'slots/' + slot);
+            await set(slotRef, name);  // Set the slot with the user's name
         });
+
+        // Add user to participants table
+        addParticipantToTable(name, selectedSlots);
+
+        alert('Your participation has been confirmed!');
     }
 
-    // Update the participants table
-    function updateParticipantsList() {
-        const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-        tableBody.innerHTML = '';  // Clear existing rows
-
-        // Fetch all participants from Firebase
-        get(child(dbRef, 'users')).then(snapshot => {
-            if (snapshot.exists()) {
-                snapshot.forEach(childSnapshot => {
-                    const data = childSnapshot.val();
-                    const row = tableBody.insertRow();
-                    row.innerHTML = `<td>${data.slots.join(', ')}</td><td>${data.name}</td><td>${data.totalAmount} AED</td>`;
-                });
-            }
-        }).catch(error => {
-            console.error("Error fetching participants data:", error);
-        });
+    // Add participant to table
+    function addParticipantToTable(name, selectedSlots) {
+        const table = document.getElementById("participantsTable").getElementsByTagName('tbody')[0];
+        const row = table.insertRow();
+        row.insertCell(0).textContent = selectedSlots.join(", ");
+        row.insertCell(1).textContent = name;
+        row.insertCell(2).textContent = selectedSlots.length * slotPrice + " AED";
+        row.insertCell(3).textContent = 'No';  // Payment status initially set to "No"
     }
 
-    // Initialize page
+    // Event listener for the submit button
+    document.getElementById('submitBtn').onclick = submitForm;
+
+    // Initialize the page
     createSlots();
-    updateParticipantsList();  // Load the initial participants list from Firebase
-
-    // Ensure submitForm is properly bound to the button click
-    document.getElementById('submitBtn').addEventListener('click', submitForm);
-
 </script>
-
 </body>
 </html>
