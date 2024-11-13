@@ -50,15 +50,16 @@
         /* Slot styling */
         .slot {
             display: inline-block;
-            padding: 10px 15px;
+            padding: 8px 12px;
             margin: 5px;
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            width: calc(10% - 10px); /* 10 columns */
+            width: 80px; /* Smaller width */
+            height: 40px; /* Smaller height */
             box-sizing: border-box;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 12px;
             text-align: center;
         }
 
@@ -77,10 +78,10 @@
             color: #fff;
         }
 
-        /* Grid layout for 10 slots per row */
+        /* Grid layout for 5 slots per column */
         .slots-container {
             display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 10 columns */
+            grid-template-columns: repeat(5, 1fr); /* 5 columns */
             gap: 10px;
             padding: 20px 0;
             max-width: 100%;
@@ -259,11 +260,11 @@
             selectedSlots = selectedSlots.filter(s => s !== slotNumber);
             document.querySelector(`[data-slot="${slotNumber}"]`).classList.remove('selected');
         } else {
-            if (selectedSlots.length < 20) {  // Max 20 slots
+            if (selectedSlots.length < 5) {  // Max 5 slots
                 selectedSlots.push(slotNumber);
                 document.querySelector(`[data-slot="${slotNumber}"]`).classList.add('selected');
             } else {
-                alert('You can only select up to 20 slots!');
+                alert('You can only select up to 5 slots!');
             }
         }
         updateSlotInfo();
