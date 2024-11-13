@@ -241,4 +241,29 @@
                 const playerNameCell = row.cells[1];
                 if (slotCell.textContent == slot && playerNameCell.textContent == name) {
                     const statusButton = row.querySelector(status ? '.paid-button' : '.unpaid-button');
-                    statusButton.textContent = status ? 'Paid' : 'Unpaid
+                    statusButton.textContent = status ? 'Paid' : 'Unpaid';
+                    statusButton.classList.toggle('paid-button', status);
+                    statusButton.classList.toggle('unpaid-button', !status);
+                }
+            }
+        }
+
+        // Save the selection to Firestore
+        function saveSelectionToFirestore(name) {
+            db.collection("raffleEntries").add({
+                name: name,
+                slots: selectedSlots,
+                totalAmount: selectedSlots.length * slotPrice,
+                status: "Unpaid"
+            }).then(() => {
+                console.log("Entry saved to Firestore!");
+            }).catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+        }
+
+        // Call createSlots function when the page loads
+        window.onload = createSlots;
+    </script>
+</body>
+</html>
