@@ -18,6 +18,7 @@
             text-align: center;
             cursor: pointer;
             user-select: none;
+            font-size: 14px;
         }
 
         .slot.selected {
@@ -33,6 +34,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
 
         table, th, td {
@@ -42,6 +44,27 @@
         th, td {
             padding: 10px;
             text-align: left;
+            font-size: 14px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            #slotsContainer {
+                grid-template-columns: repeat(5, 1fr); /* Adjust grid to fit mobile screens */
+            }
+
+            .slot {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
