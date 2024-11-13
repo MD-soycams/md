@@ -5,7 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mighty David 7th Raffle Bonanza</title>
     <style>
-        /* Same CSS as before */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .slotsContainer {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .slot {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            user-select: none;
+        }
+
+        .slot:hover {
+            background-color: #e0e0e0;
+        }
+
+        .slot.disabled {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +142,7 @@
                 slot.classList.add('slot');
                 slot.textContent = i;
                 slot.dataset.slotNumber = i;
+                slot.addEventListener('click', () => toggleSlotSelection(i));
                 slotsContainer.appendChild(slot);
             }
             syncSlotsWithFirebase();
@@ -148,12 +213,25 @@
         function updateSelectionsTable() {
             const tableBody = document.getElementById('selectionsTableBody');
             tableBody.innerHTML = '';
+            const groupedData = {};
+
             Object.entries(allSelections).forEach(([slot, data]) => {
+                if (!groupedData[data.name]) {
+                    groupedData[data.name] = {
+                        slots: [],
+                        totalAmount: 0
+                    };
+                }
+                groupedData[data.name].slots.push(slot);
+                groupedData[data.name].totalAmount += data.amount;
+            });
+
+            Object.entries(groupedData).forEach(([name, details]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${slot}</td>
-                    <td>${data.name}</td>
-                    <td>${slotPrice} AED</td>
+                    <td>${details.slots.join(', ')}</td>
+                    <td>${name}</td>
+                    <td>${details.totalAmount} AED</td>
                 `;
                 tableBody.appendChild(row);
             });
