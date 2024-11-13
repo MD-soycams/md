@@ -22,12 +22,11 @@
         }
         .slotsContainer {
             display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 10 columns per row */
+            grid-template-columns: repeat(10, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
         .slot {
-            margin: 10px;
             padding: 10px;
             background-color: #f1f1f1;
             border-radius: 5px;
@@ -63,23 +62,6 @@
         td {
             text-align: center;
         }
-        .paid-button, .unpaid-button {
-            padding: 5px 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-        }
-        .paid-button {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .unpaid-button {
-            background-color: #f44336;
-            color: white;
-        }
-        #selectedList {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
@@ -96,9 +78,7 @@
         <h3>Total Slots Available: 100</h3>
         <h3>50 AED per slot</h3>
 
-        <div id="slotsContainer" class="slotsContainer">
-            <!-- Slots will be dynamically added here -->
-        </div>
+        <div id="slotsContainer" class="slotsContainer"></div>
 
         <h3>Selected Slots: <span id="selectedCount">0</span></h3>
         <h3>Total Payment: <span id="totalAmount">0</span> AED</h3>
@@ -106,145 +86,88 @@
         <input type="text" id="nameInput" placeholder="Enter your name">
         <button class="button" onclick="submitForm()">Submit</button>
 
-        <div id="statusMessage"></div>
-
-        <!-- Display list of selected slots and payment info -->
-        <h3>Selected Slots and Payment Information</h3>
-        <div id="selectedList"></div>
-
-        <!-- Table for tracking selections -->
-        <h3>Selected Slots and Payment Information</h3>
-        <table id="selectionTable">
-            <thead>
-                <tr>
-                    <th>Slot Number</th>
-                    <th>Player Name</th>
-                    <th>Amount (AED)</th>
-                    <th>Payment Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows for each selected slot will be added here -->
-            </tbody>
-        </table>
+        <div id="selectedList">
+            <h3>Selections:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Slot Number</th>
+                        <th>Name</th>
+                        <th>Amount (AED)</th>
+                    </tr>
+                </thead>
+                <tbody id="selectionsTableBody"></tbody>
+            </table>
+        </div>
     </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js"></script> <!-- Firestore SDK -->
-    <script>
-      // Firebase Configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
-        authDomain: "md-raffle.firebaseapp.com",
-        databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
-        projectId: "md-raffle",
-        storageBucket: "md-raffle.firebasestorage.app",
-        messagingSenderId: "469756144780",
-        appId: "1:469756144780:web:b2892c0e3808628d429fa9",
-        measurementId: "G-KHQBQ730PG"
-      };
-
-      // Initialize Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
-    </script>
 
     <script>
         const totalSlots = 100;
         const slotPrice = 50;
         let selectedSlots = [];
-        let users = []; // Array to hold selected slots and user names
 
-        // Function to generate slots
         function createSlots() {
             const slotsContainer = document.getElementById('slotsContainer');
             for (let i = 1; i <= totalSlots; i++) {
                 const slot = document.createElement('div');
                 slot.classList.add('slot');
-                slot.textContent = `${i}`;
-                slot.setAttribute('data-slot', i);
-                slot.onclick = function () {
-                    toggleSlotSelection(i);
-                };
+                slot.textContent = i;
+                slot.addEventListener('click', () => toggleSlotSelection(i));
                 slotsContainer.appendChild(slot);
             }
         }
 
-        // Toggle slot selection
         function toggleSlotSelection(slotNumber) {
-            const index = selectedSlots.findIndex(slot => slot.number === slotNumber);
-            const slotElement = document.querySelector(`[data-slot="${slotNumber}"]`);
-            
-            if (index === -1) {
+            const slotIndex = selectedSlots.findIndex(slot => slot.number === slotNumber);
+            const slotElement = document.querySelector(`.slot:nth-child(${slotNumber})`);
+            if (slotIndex === -1) {
                 selectedSlots.push({ number: slotNumber, name: '' });
                 slotElement.classList.add('selected');
             } else {
-                selectedSlots.splice(index, 1);
+                selectedSlots.splice(slotIndex, 1);
                 slotElement.classList.remove('selected');
             }
             updateSummary();
         }
 
-        // Update selected slots and total amount
         function updateSummary() {
             document.getElementById('selectedCount').textContent = selectedSlots.length;
             document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
         }
 
-        // Submit form with name and selected slots
         function submitForm() {
-            const name = document.getElementById('nameInput').value;
-            if (name === "") {
-                alert("Please enter your name.");
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert("Please enter a name.");
                 return;
             }
 
-            if (selectedSlots.length === 0) {
-                alert("Please select at least one slot.");
-                return;
-            }
-
-            // Assign the player's name to the selected slots
-            selectedSlots.forEach(slot => {
-                slot.name = name;
-            });
-
-            updateStatusMessage(name);
+            selectedSlots.forEach(slot => slot.name = name);
+            updateSelectionsTable();
             resetSelection();
-            updateSelectionTable(name);
-            updateSelectedList();
-            saveSelectionToFirestore(name);
         }
 
-        // Show payment status
-        function updateStatusMessage(name) {
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.innerHTML = `<p class="status">User ${name} has selected slots: ${selectedSlots.map(slot => `${slot.number}. ${slot.name}`).join(', ')}. Please pay ${selectedSlots.length * slotPrice} AED.</p>`;
-        }
-
-        // Reset selection after submission
         function resetSelection() {
             selectedSlots = [];
             updateSummary();
+            document.querySelectorAll('.slot').forEach(slot => slot.classList.remove('selected'));
         }
 
-        // Update selection table with user and their selected slots
-        function updateSelectionTable(name) {
-            const tableBody = document.querySelector('#selectionTable tbody');
+        function updateSelectionsTable() {
+            const tableBody = document.getElementById('selectionsTableBody');
+            tableBody.innerHTML = '';
             selectedSlots.forEach(slot => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${slot.number}</td>
                     <td>${slot.name}</td>
                     <td>${slotPrice}</td>
-                    <td><button class="paid-button" onclick="updatePaymentStatus('${slot.name}', ${slot.number}, true)">Paid</button> 
-                    <button class="unpaid-button" onclick="updatePaymentStatus('${slot.name}', ${slot.number}, false)">Unpaid</button></td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        // Update payment status in table
-        function updatePaymentStatus(name, slot, status) {
-            const table
+        window.onload = createSlots;
+    </script>
+</body>
+</html>
