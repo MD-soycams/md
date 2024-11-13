@@ -3,67 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mighty David 7th Raffle Bonanza</title>
+    <title>Raffle Slot Selection</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-        }
-
-        .slotsContainer {
+        #slotsContainer {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             gap: 10px;
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
 
         .slot {
-            border: 1px solid #ccc;
+            border: 1px solid #000;
             padding: 10px;
             text-align: center;
             cursor: pointer;
-            background-color: #f9f9f9;
-            border-radius: 5px;
             user-select: none;
         }
 
-        .slot:hover {
-            background-color: #e0e0e0;
+        .slot.selected {
+            background-color: #90ee90;
+            font-weight: bold;
         }
 
         .slot.disabled {
-            background-color: #d3d3d3;
+            background-color: #ccc;
             cursor: not-allowed;
-        }
-
-        .button {
-            padding: 10px 20px;
-            margin: 10px 0;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
         }
 
         table, th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #000;
         }
 
         th, td {
@@ -73,43 +46,31 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Mighty David 7th Raffle Bonanza</h1>
-        <p>Draw Date: December 1st, 2024 (Thanksgiving Party)</p>
-        <h2>Prizes</h2>
-        <ul>
-            <li>1st Prize: 1000 AED</li>
-            <li>2nd Prize: 300 AED</li>
-            <li>2 Consolation Prizes: 100 AED each</li>
-        </ul>
 
-        <h3>Total Slots Available: 100</h3>
-        <h3>50 AED per slot</h3>
+    <h1>Raffle Slot Selection</h1>
+    <div id="slotsContainer"></div>
 
-        <div id="slotsContainer" class="slotsContainer"></div>
+    <form onsubmit="event.preventDefault(); submitForm();">
+        <input type="text" id="nameInput" placeholder="Enter your name" required />
+        <button type="submit">Submit</button>
+    </form>
 
-        <h3>Selected Slots: <span id="selectedCount">0</span></h3>
-        <h3>Total Payment: <span id="totalAmount">0</span> AED</h3>
+    <h3>Summary</h3>
+    <p>Selected Slots: <span id="selectedCount">0</span></p>
+    <p>Total Amount: <span id="totalAmount">0</span> AED</p>
 
-        <input type="text" id="nameInput" placeholder="Enter your name">
-        <button class="button" onclick="submitForm()">Submit</button>
+    <h3>Selections</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Slots</th>
+                <th>Name</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody id="selectionsTableBody"></tbody>
+    </table>
 
-        <div id="selectedList">
-            <h3>Selections:</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Slots</th>
-                        <th>Name</th>
-                        <th>Total Amount (AED)</th>
-                    </tr>
-                </thead>
-                <tbody id="selectionsTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Firebase Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -165,6 +126,7 @@
                 if (selection) {
                     slot.textContent = `${slotNumber}. ${selection.name}`;
                     slot.classList.add('disabled');
+                    slot.classList.remove('selected');
                     slot.removeEventListener('click', () => toggleSlotSelection(slotNumber));
                 } else {
                     slot.classList.remove('disabled');
@@ -175,11 +137,16 @@
         }
 
         function toggleSlotSelection(slotNumber) {
+            const slotElement = document.querySelector(`.slot[data-slot-number="${slotNumber}"]`);
+
             if (selectedSlots.includes(slotNumber)) {
                 selectedSlots = selectedSlots.filter(num => num !== slotNumber);
+                slotElement.classList.remove('selected');
             } else {
                 selectedSlots.push(slotNumber);
+                slotElement.classList.add('selected');
             }
+
             updateSummary();
         }
 
@@ -239,5 +206,6 @@
 
         window.onload = createSlots;
     </script>
+
 </body>
 </html>
