@@ -3,45 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slot Selection</title>
+    <title>Raffle Slot Selection</title>
     <style>
-        /* Your CSS goes here */
-        .slot { 
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            background-color: #f1f1f1;
-            margin: 5px;
-            cursor: pointer;
+        #slotsContainer {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
-        .selected { background-color: #00ff00; }
-        .disabled { background-color: #d3d3d3; }
+
+        .slot {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+        }
+
+        .slot.selected {
+            background-color: #90ee90;
+            font-weight: bold;
+        }
+
+        .slot.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            #slotsContainer {
+                grid-template-columns: repeat(5, 1fr); /* Adjust grid to fit mobile screens */
+            }
+
+            .slot {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Slot Selection</h1>
-    
-    <!-- Slot Grid -->
-    <div id="slotsContainer"></div>
-    
-    <!-- Name Input and Submit Button -->
-    <div>
-        <input type="text" id="nameInput" placeholder="Enter your name">
-        <button onclick="submitForm()">Submit</button>
-    </div>
 
-    <!-- Summary of Selected Slots -->
-    <div>
-        <p>Selected Slots: <span id="selectedCount">0</span></p>
-        <p>Total: <span id="totalAmount">0</span> AED</p>
-    </div>
-    
-    <!-- Table for Displaying Selected Slots and Their Prices -->
+    <h1>Raffle Slot Selection</h1>
+    <div id="slotsContainer"></div>
+
+    <form onsubmit="event.preventDefault(); submitForm();">
+        <input type="text" id="nameInput" placeholder="Enter your name" required />
+        <button type="submit">Submit</button>
+    </form>
+
+    <h3>Summary</h3>
+    <p>Selected Slots: <span id="selectedCount">0</span></p>
+    <p>Total Amount: <span id="totalAmount">0</span> AED</p>
+
+    <h3>Selections</h3>
     <table>
         <thead>
             <tr>
-                <th>Selected Numbers</th>
+                <th>Slots</th>
                 <th>Name</th>
                 <th>Total Amount</th>
             </tr>
@@ -49,145 +94,145 @@
         <tbody id="selectionsTableBody"></tbody>
     </table>
 
-    <!-- Firebase Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
-            authDomain: "md-raffle.firebaseapp.com",
-            databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
-            projectId: "md-raffle",
-            storageBucket: "md-raffle.appspot.com",
-            messagingSenderId: "469756144780",
-            appId: "1:469756144780:web:b2892c0e3808628d429fa9",
-            measurementId: "G-KHQBQ730PG"
-        };
+  const firebaseConfig = {
+      apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
+      authDomain: "md-raffle.firebaseapp.com",
+      databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
+      projectId: "md-raffle",
+      storageBucket: "md-raffle.appspot.com",
+      messagingSenderId: "469756144780",
+      appId: "1:469756144780:web:b2892c0e3808628d429fa9",
+      measurementId: "G-KHQBQ730PG"
+  };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const slotsRef = ref(db, 'slots');
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const slotsRef = ref(db, 'slots');
 
-        const totalSlots = 100;
-        const slotPrice = 50;
-        let selectedSlots = [];
-        let allSelections = {};
+  const totalSlots = 100;
+  const slotPrice = 50;
+  let selectedSlots = [];
+  let allSelections = {};
 
-        function createSlots() {
-            const slotsContainer = document.getElementById('slotsContainer');
-            slotsContainer.innerHTML = '';
-            for (let i = 1; i <= totalSlots; i++) {
-                const slot = document.createElement('div');
-                slot.classList.add('slot');
-                slot.textContent = i;
-                slot.dataset.slotNumber = i;
-                slot.addEventListener('click', () => toggleSlotSelection(i));
-                slotsContainer.appendChild(slot);
-            }
-            syncSlotsWithFirebase();
-        }
+  function createSlots() {
+      const slotsContainer = document.getElementById('slotsContainer');
+      slotsContainer.innerHTML = '';
+      for (let i = 1; i <= totalSlots; i++) {
+          const slot = document.createElement('div');
+          slot.classList.add('slot');
+          slot.textContent = i;
+          slot.dataset.slotNumber = i;
+          slot.addEventListener('click', () => toggleSlotSelection(i));
+          slotsContainer.appendChild(slot);
+      }
+      syncSlotsWithFirebase();
+  }
 
-        function syncSlotsWithFirebase() {
-            onValue(slotsRef, (snapshot) => {
-                allSelections = snapshot.val() || {};
-                updateUIFromFirebase();
-            });
-        }
+  function syncSlotsWithFirebase() {
+      onValue(slotsRef, (snapshot) => {
+          allSelections = snapshot.val() || {};
+          updateUIFromFirebase();
+      });
+  }
 
-        function updateUIFromFirebase() {
-            const slotsContainer = document.getElementById('slotsContainer');
-            const slots = slotsContainer.querySelectorAll('.slot');
+  function updateUIFromFirebase() {
+      const slotsContainer = document.getElementById('slotsContainer');
+      const slots = slotsContainer.querySelectorAll('.slot');
 
-            slots.forEach(slot => {
-                const slotNumber = slot.dataset.slotNumber;
-                const selection = allSelections[slotNumber];
-                if (selection) {
-                    slot.textContent = `${slotNumber}. ${selection.name}`;
-                    slot.classList.add('disabled');
-                    slot.classList.remove('selected');
-                    slot.removeEventListener('click', toggleSlotSelection);
-                } else {
-                    slot.classList.remove('disabled');
-                    slot.textContent = slotNumber;
-                }
-            });
-            updateSelectionsTable();
-        }
+      slots.forEach(slot => {
+          const slotNumber = slot.dataset.slotNumber;
+          const selection = allSelections[slotNumber];
+          if (selection) {
+              slot.textContent = `${slotNumber}. ${selection.name}`;
+              slot.classList.add('disabled');
+              slot.classList.remove('selected');
+              slot.removeEventListener('click', toggleSlotSelection);
+          } else {
+              slot.classList.remove('disabled');
+              slot.textContent = slotNumber;
+          }
+      });
+      updateSelectionsTable();
+  }
 
-        function toggleSlotSelection(slotNumber) {
-            const slotElement = document.querySelector(`.slot[data-slot-number="${slotNumber}"]`);
-            if (slotElement.classList.contains('disabled')) return;
+  function toggleSlotSelection(slotNumber) {
+      const slotElement = document.querySelector(`.slot[data-slot-number="${slotNumber}"]`);
+      if (slotElement.classList.contains('disabled')) return;
 
-            if (selectedSlots.includes(slotNumber)) {
-                selectedSlots = selectedSlots.filter(num => num !== slotNumber);
-                slotElement.classList.remove('selected');
-            } else {
-                selectedSlots.push(slotNumber);
-                slotElement.classList.add('selected');
-            }
+      if (selectedSlots.includes(slotNumber)) {
+          selectedSlots = selectedSlots.filter(num => num !== slotNumber);
+          slotElement.classList.remove('selected');
+      } else {
+          selectedSlots.push(slotNumber);
+          slotElement.classList.add('selected');
+      }
 
-            updateSummary();
-        }
+      updateSummary();
+  }
 
-        function updateSummary() {
-            document.getElementById('selectedCount').textContent = selectedSlots.length;
-            document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
-        }
+  function updateSummary() {
+      document.getElementById('selectedCount').textContent = selectedSlots.length;
+      document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
+  }
 
-        function submitForm() {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name || selectedSlots.length === 0) {
-                alert("Please enter a name and select at least one slot.");
-                return;
-            }
+  function submitForm() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name || selectedSlots.length === 0) {
+          alert("Please enter a name and select at least one slot.");
+          return;
+      }
 
-            selectedSlots.forEach(slotNumber => {
-                set(ref(db, `slots/${slotNumber}`), {
-                    name: name,
-                    amount: slotPrice
-                });
-            });
+      selectedSlots.forEach(slotNumber => {
+          set(ref(db, `slots/${slotNumber}`), {
+              name: name,
+              amount: slotPrice
+          });
+      });
 
-            alert(`${name}'s slots saved!`);
+      alert(`${name}'s slots saved!`);
 
-            resetSelection();
-        }
+      resetSelection();
+  }
 
-        function resetSelection() {
-            selectedSlots = [];
-            updateSummary();
-            createSlots(); // Reload UI
-        }
+  function resetSelection() {
+      selectedSlots = [];
+      updateSummary();
+      createSlots(); // Reload UI
+  }
 
-        function updateSelectionsTable() {
-            const tableBody = document.getElementById('selectionsTableBody');
-            tableBody.innerHTML = '';
-            const groupedData = {};
+  function updateSelectionsTable() {
+      const tableBody = document.getElementById('selectionsTableBody');
+      tableBody.innerHTML = '';
+      const groupedData = {};
 
-            Object.entries(allSelections).forEach(([slot, data]) => {
-                if (!groupedData[data.name]) {
-                    groupedData[data.name] = {
-                        slots: [],
-                        totalAmount: 0
-                    };
-                }
-                groupedData[data.name].slots.push(slot);
-                groupedData[data.name].totalAmount += data.amount;
-            });
+      Object.entries(allSelections).forEach(([slot, data]) => {
+          if (!groupedData[data.name]) {
+              groupedData[data.name] = {
+                  slots: [],
+                  totalAmount: 0
+              };
+          }
+          groupedData[data.name].slots.push(slot);
+          groupedData[data.name].totalAmount += data.amount;
+      });
 
-            Object.entries(groupedData).forEach(([name, details]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${details.slots.join(', ')}</td>
-                    <td>${name}</td>
-                    <td>${details.totalAmount} AED</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
+      Object.entries(groupedData).forEach(([name, details]) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td>${details.slots.join(', ')}</td>
+              <td>${name}</td>
+              <td>${details.totalAmount} AED</td>
+          `;
+          tableBody.appendChild(row);
+      });
+  }
 
-        window.onload = createSlots;
-    </script>
+  window.onload = createSlots;
+</script>
+    
 </body>
 </html>
