@@ -3,90 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raffle Slot Selection</title>
+    <title>Slot Selection</title>
     <style>
-        #slotsContainer {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .slot {
-            border: 1px solid #000;
-            padding: 10px;
+        /* Your CSS goes here */
+        .slot { 
+            display: inline-block;
+            width: 50px;
+            height: 50px;
             text-align: center;
+            background-color: #f1f1f1;
+            margin: 5px;
             cursor: pointer;
-            user-select: none;
-            font-size: 14px;
         }
-
-        .slot.selected {
-            background-color: #90ee90;
-            font-weight: bold;
-        }
-
-        .slot.disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #000;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            #slotsContainer {
-                grid-template-columns: repeat(5, 1fr); /* Adjust grid to fit mobile screens */
-            }
-
-            .slot {
-                padding: 8px;
-                font-size: 12px;
-            }
-
-            th, td {
-                font-size: 12px;
-                padding: 8px;
-            }
-        }
+        .selected { background-color: #00ff00; }
+        .disabled { background-color: #d3d3d3; }
     </style>
 </head>
 <body>
-
-    <h1>Raffle Slot Selection</h1>
+    <h1>Slot Selection</h1>
+    
+    <!-- Slot Grid -->
     <div id="slotsContainer"></div>
+    
+    <!-- Name Input and Submit Button -->
+    <div>
+        <input type="text" id="nameInput" placeholder="Enter your name">
+        <button onclick="submitForm()">Submit</button>
+    </div>
 
-    <form onsubmit="event.preventDefault(); submitForm();">
-        <input type="text" id="nameInput" placeholder="Enter your name" required />
-        <button type="submit">Submit</button>
-    </form>
-
-    <h3>Summary</h3>
-    <p>Selected Slots: <span id="selectedCount">0</span></p>
-    <p>Total Amount: <span id="totalAmount">0</span> AED</p>
-
-    <h3>Selections</h3>
+    <!-- Summary of Selected Slots -->
+    <div>
+        <p>Selected Slots: <span id="selectedCount">0</span></p>
+        <p>Total: <span id="totalAmount">0</span> AED</p>
+    </div>
+    
+    <!-- Table for Displaying Selected Slots and Their Prices -->
     <table>
         <thead>
             <tr>
-                <th>Slots</th>
+                <th>Selected Numbers</th>
                 <th>Name</th>
                 <th>Total Amount</th>
             </tr>
@@ -94,6 +49,7 @@
         <tbody id="selectionsTableBody"></tbody>
     </table>
 
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -150,7 +106,7 @@
                     slot.textContent = `${slotNumber}. ${selection.name}`;
                     slot.classList.add('disabled');
                     slot.classList.remove('selected');
-                    slot.removeEventListener('click', () => toggleSlotSelection(slotNumber));
+                    slot.removeEventListener('click', toggleSlotSelection);
                 } else {
                     slot.classList.remove('disabled');
                     slot.textContent = slotNumber;
@@ -161,6 +117,7 @@
 
         function toggleSlotSelection(slotNumber) {
             const slotElement = document.querySelector(`.slot[data-slot-number="${slotNumber}"]`);
+            if (slotElement.classList.contains('disabled')) return;
 
             if (selectedSlots.includes(slotNumber)) {
                 selectedSlots = selectedSlots.filter(num => num !== slotNumber);
@@ -192,12 +149,15 @@
                 });
             });
 
+            alert(`${name}'s slots saved!`);
+
             resetSelection();
         }
 
         function resetSelection() {
             selectedSlots = [];
             updateSummary();
+            createSlots(); // Reload UI
         }
 
         function updateSelectionsTable() {
@@ -229,6 +189,5 @@
 
         window.onload = createSlots;
     </script>
-
 </body>
 </html>
