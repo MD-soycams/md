@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mighty David 7th Raffle Bonanza</title>
     <style>
+        /* Add your existing styles here */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -12,7 +13,6 @@
             padding: 0;
         }
 
-        /* Main container */
         .container {
             text-align: center;
             max-width: 1100px;
@@ -23,7 +23,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Header styling */
         h1 {
             font-size: 36px;
             font-weight: bold;
@@ -47,7 +46,6 @@
             margin-bottom: 10px;
         }
 
-        /* Slot styling */
         .slot {
             display: inline-block;
             padding: 15px;
@@ -55,12 +53,12 @@
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            box-sizing: border-box;  /* Ensures padding and border are included in the width/height */
+            box-sizing: border-box;
             border-radius: 5px;
             font-size: 18px;
             text-align: center;
-            width: 100%; /* Ensures full width within its grid cell */
-            white-space: nowrap; /* Prevents overflow of text */
+            width: 100%;
+            white-space: nowrap;
         }
 
         .slot:hover {
@@ -78,7 +76,6 @@
             color: #fff;
         }
 
-        /* Grid layout for 5 slots per row */
         .slots-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -86,10 +83,9 @@
             padding: 20px 0;
             max-width: 100%;
             justify-content: center;
-            overflow-x: auto; /* Prevents overflow */
+            overflow-x: auto;
         }
 
-        /* Form and table styling */
         input[type="text"] {
             padding: 10px;
             margin: 10px 0;
@@ -114,7 +110,6 @@
             background-color: #2980b9;
         }
 
-        /* Participants Table */
         table {
             width: 100%;
             margin-top: 20px;
@@ -141,7 +136,6 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
-
     </style>
 </head>
 <body>
@@ -181,7 +175,7 @@
                 <th>Name</th>
                 <th>Total to Pay (AED)</th>
                 <th>Payment Status</th>
-                <th>Action</th> <!-- Added a column for action -->
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -192,7 +186,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
@@ -205,7 +199,6 @@
         measurementId: "G-KHQBQ730PG"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const dbRef = ref(db);
@@ -215,7 +208,7 @@
     let selectedSlots = [];
     let users = [];
 
-    // Function to generate slots
+    // Function to create slots
     function createSlots() {
         const slotsContainer = document.getElementById('slotsContainer');
         for (let i = 1; i <= totalSlots; i++) {
@@ -237,7 +230,7 @@
                     const slotElement = document.querySelector(`[data-slot="${slot}"]`);
                     if (slotElement) {
                         slotElement.classList.add('occupied');
-                        slotElement.textContent = `${slot} ${occupiedSlots[slot]}`;  // Display name in occupied slot
+                        slotElement.textContent = `${slot} ${occupiedSlots[slot]}`;
                     }
                 }
             }
@@ -246,82 +239,127 @@
         });
     }
 
-    // Toggle slot selection
-    function toggleSlotSelection(slotNumber) {
-        if (selectedSlots.includes(slotNumber)) {
-            selectedSlots = selectedSlots.filter(s => s !== slotNumber);
-            document.querySelector(`[data-slot="${slotNumber}"]`).classList.remove('selected');
-        } else {
-            if (selectedSlots.length < 5) {  // Max 5 slots
-                selectedSlots.push(slotNumber);
-                document.querySelector(`[data-slot="${slotNumber}"]`).classList.add('selected');
+    // Fetch the participant list from Firebase and display it
+    function fetchParticipants() {
+        get(child(dbRef, 'participants')).then(snapshot => {
+            if (snapshot.exists()) {
+                const participants = snapshot.val();
+                const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; // Clear existing rows
+                for (const key in participants) {
+                    const participant = participants[key];
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = participant.slotNumbers.join(", ");
+                    row.insertCell(1).textContent = participant.name;
+                    row.insertCell(2).textContent = participant.amountToPay;
+                    row.insertCell(3).textContent = participant.paymentStatus;
+                    const removeCell = row.insertCell(4);
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Remove';
+                    removeButton.onclick = function () {
+                        removeParticipant(key, participant.slotNumbers);
+                    };
+                    removeCell.appendChild(removeButton);
+                }
             }
+        }).catch(error => {
+            console.error("Error fetching participants:", error);
+        });
+    }
+
+    // Toggle slot selection
+    function toggleSlotSelection(slot) {
+        const index = selectedSlots.indexOf(slot);
+        if (index === -1) {
+            if (selectedSlots.length < 3) {
+                selectedSlots.push(slot);
+            }
+        } else {
+            selectedSlots.splice(index, 1);
         }
-        updateSlotInfo();
+        updateSlotDisplay();
+        updateTotalAmount();
     }
 
-    // Update selected slots info
-    function updateSlotInfo() {
-        document.getElementById('selectedCount').textContent = selectedSlots.length;
-        document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
+    // Update slot display
+    function updateSlotDisplay() {
+        const slotsContainer = document.getElementById('slotsContainer');
+        const selectedCountElement = document.getElementById('selectedCount');
+        selectedCountElement.textContent = selectedSlots.length;
+        const totalAmountElement = document.getElementById('totalAmount');
+        totalAmountElement.textContent = selectedSlots.length * slotPrice;
+
+        // Update slot classes
+        const slots = slotsContainer.getElementsByClassName('slot');
+        Array.from(slots).forEach(slotElement => {
+            const slotNumber = parseInt(slotElement.getAttribute('data-slot'));
+            if (selectedSlots.includes(slotNumber)) {
+                slotElement.classList.add('selected');
+            } else {
+                slotElement.classList.remove('selected');
+            }
+        });
     }
 
-    // Handle submit
+    // Update total amount
+    function updateTotalAmount() {
+        const totalAmount = selectedSlots.length * slotPrice;
+        document.getElementById('totalAmount').textContent = totalAmount;
+    }
+
+    // Submit participant info
     document.getElementById('submitBtn').onclick = function () {
         const name = document.getElementById('nameInput').value;
-        if (!name || selectedSlots.length === 0) {
+        if (name && selectedSlots.length > 0) {
+            const slotNumbers = [...selectedSlots];
+            const amountToPay = selectedSlots.length * slotPrice;
+
+            const participantId = `participant-${Date.now()}`;
+            set(ref(db, 'participants/' + participantId), {
+                name: name,
+                slotNumbers: slotNumbers,
+                amountToPay: amountToPay,
+                paymentStatus: 'Pending'
+            }).then(() => {
+                // Add slots to Firebase
+                const updates = {};
+                selectedSlots.forEach(slot => {
+                    updates['slots/' + slot] = name;
+                });
+
+                set(ref(db), updates);
+                selectedSlots = [];
+                updateSlotDisplay();
+                fetchParticipants();
+            }).catch(error => {
+                console.error("Error submitting participant:", error);
+            });
+        } else {
             alert("Please enter your name and select at least one slot.");
-            return;
         }
-
-        selectedSlots.forEach(slot => {
-            // Write selected slot and name to Firebase
-            set(ref(db, 'slots/' + slot), name);
-
-            // Add participant to the users array
-            users.push({ name, slotNumber: slot });
-        });
-
-        // Update participants table
-        updateParticipantsTable();
-
-        // Reset the form
-        document.getElementById('nameInput').value = '';
-        selectedSlots = [];
-        updateSlotInfo();
     };
 
-    // Update participants table
-    function updateParticipantsTable() {
-        const participantsTableBody = document.querySelector('#participantsTable tbody');
-        participantsTableBody.innerHTML = ''; // Clear the existing rows
-
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.slotNumber}</td>
-                <td>${user.name}</td>
-                <td>${slotPrice} AED</td>
-                <td><select><option value="Not Paid">Not Paid</option><option value="Paid">Paid</option></select></td>
-                <td><button onclick="removeParticipant(${user.slotNumber})">Remove</button></td>
-            `;
-            participantsTableBody.appendChild(row);
+    // Remove participant and free their slots
+    function removeParticipant(participantId, slotNumbers) {
+        remove(ref(db, 'participants/' + participantId)).then(() => {
+            slotNumbers.forEach(slot => {
+                const slotElement = document.querySelector(`[data-slot="${slot}"]`);
+                if (slotElement) {
+                    slotElement.classList.remove('occupied');
+                    slotElement.classList.remove('selected');
+                    slotElement.textContent = slot;
+                }
+                set(ref(db, 'slots/' + slot), null); // Clear the slot in Firebase
+            });
+            fetchParticipants();
+        }).catch(error => {
+            console.error("Error removing participant:", error);
         });
     }
 
-    // Remove a participant
-    function removeParticipant(slotNumber) {
-        users = users.filter(user => user.slotNumber !== slotNumber);
-        updateParticipantsTable();
-        // Reset the slot back to available
-        set(ref(db, 'slots/' + slotNumber), null);
-        const slotElement = document.querySelector(`[data-slot="${slotNumber}"]`);
-        slotElement.classList.remove('occupied');
-        slotElement.classList.remove('selected');
-        slotElement.textContent = slotNumber;
-    }
-
+    // Initializing page
     createSlots();
+    fetchParticipants();
 </script>
 
 </body>
