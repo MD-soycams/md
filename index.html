@@ -181,6 +181,7 @@
                 <th>Name</th>
                 <th>Total to Pay (AED)</th>
                 <th>Payment Status</th>
+                <th>Action</th> <!-- Added a column for action -->
             </tr>
         </thead>
         <tbody>
@@ -268,49 +269,58 @@
     // Handle submit
     document.getElementById('submitBtn').onclick = function () {
         const name = document.getElementById('nameInput').value;
-        if (!name) {
-            alert('Please enter your name!');
+        if (!name || selectedSlots.length === 0) {
+            alert("Please enter your name and select at least one slot.");
             return;
         }
 
-        // Check if slots are selected
-        if (selectedSlots.length === 0) {
-            alert('Please select at least one slot!');
-            return;
-        }
-
-        // Write user data to Firebase
-        const selectedSlotsStr = selectedSlots.join(',');
         selectedSlots.forEach(slot => {
-            const updates = {};
-            updates[`/slots/${slot}`] = name;
-            update(ref(db), updates);
+            // Write selected slot and name to Firebase
+            set(ref(db, 'slots/' + slot), name);
+
+            // Add participant to the users array
+            users.push({ name, slotNumber: slot });
         });
 
-        // Display user in the participants list
-        users.push({ name, slots: selectedSlotsStr });
+        // Update participants table
         updateParticipantsTable();
 
-        // Clear selections and input
+        // Reset the form
         document.getElementById('nameInput').value = '';
         selectedSlots = [];
-        createSlots();
         updateSlotInfo();
-        alert('Your entry has been submitted!');
     };
 
-    // Update the participants table
+    // Update participants table
     function updateParticipantsTable() {
-        const tableBody = document.querySelector('#participantsTable tbody');
-        tableBody.innerHTML = '';
+        const participantsTableBody = document.querySelector('#participantsTable tbody');
+        participantsTableBody.innerHTML = ''; // Clear the existing rows
+
         users.forEach(user => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${user.slots}</td><td>${user.name}</td><td>${user.slots.split(',').length * slotPrice}</td><td>Pending</td>`;
-            tableBody.appendChild(row);
+            row.innerHTML = `
+                <td>${user.slotNumber}</td>
+                <td>${user.name}</td>
+                <td>${slotPrice} AED</td>
+                <td><select><option value="Not Paid">Not Paid</option><option value="Paid">Paid</option></select></td>
+                <td><button onclick="removeParticipant(${user.slotNumber})">Remove</button></td>
+            `;
+            participantsTableBody.appendChild(row);
         });
     }
 
-    // Initialize the page
+    // Remove a participant
+    function removeParticipant(slotNumber) {
+        users = users.filter(user => user.slotNumber !== slotNumber);
+        updateParticipantsTable();
+        // Reset the slot back to available
+        set(ref(db, 'slots/' + slotNumber), null);
+        const slotElement = document.querySelector(`[data-slot="${slotNumber}"]`);
+        slotElement.classList.remove('occupied');
+        slotElement.classList.remove('selected');
+        slotElement.textContent = slotNumber;
+    }
+
     createSlots();
 </script>
 
