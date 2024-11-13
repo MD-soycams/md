@@ -47,9 +47,6 @@
         .button:hover {
             background-color: #45a049;
         }
-        .status {
-            color: green;
-        }
         table {
             width: 100%;
             margin-top: 20px;
@@ -109,6 +106,7 @@
         <div id="statusMessage"></div>
 
         <!-- Table for tracking selections -->
+        <h3>Selected Slots and Payment Information</h3>
         <table id="selectionTable">
             <thead>
                 <tr>
@@ -230,3 +228,18 @@
                     <td>${slotPrice}</td>
                     <td><button class="paid-button" onclick="updatePaymentStatus('${name}', ${slot}, true)">Paid</button> 
                     <button class="unpaid-button" onclick="updatePaymentStatus('${name}', ${slot}, false)">Unpaid</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update payment status in table
+        function updatePaymentStatus(name, slot, status) {
+            const tableBody = document.querySelector('#selectionTable tbody');
+            for (let row of tableBody.rows) {
+                const slotCell = row.cells[0];
+                const playerNameCell = row.cells[1];
+                if (slotCell.textContent == slot && playerNameCell.textContent == name) {
+                    const statusButton = row.querySelector(status ? '.paid-button' : '.unpaid-button');
+                    statusButton.textContent = status ? 'Paid' : 'Unpaid';
+                    statusButton.className = status ? 'paid
