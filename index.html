@@ -40,7 +40,7 @@
         <p>Total Amount: <span id="totalAmount">0</span> AED</p>
     </div>
 
-    <button class="button" onclick="submitForm()">Submit</button>
+    <button class="button" id="submitBtn">Submit</button>
 
     <div id="statusMessage"></div>
     <h3>Participants List:</h3>
@@ -177,6 +177,10 @@
     // Initialize page
     createSlots();
     updateParticipantsList();  // Load the initial participants list from Firebase
+
+    // Ensure submitForm is properly bound to the button click
+    document.getElementById('submitBtn').addEventListener('click', submitForm);
+
 </script>
 
 </body>
