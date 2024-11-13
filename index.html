@@ -96,6 +96,22 @@
             };
             slotsContainer.appendChild(slot);
         }
+
+        // Read slot data from Firebase to disable occupied slots
+        get(child(dbRef, 'slots')).then(snapshot => {
+            if (snapshot.exists()) {
+                const occupiedSlots = snapshot.val();
+                for (const slot in occupiedSlots) {
+                    const slotElement = document.querySelector(`[data-slot="${slot}"]`);
+                    if (slotElement) {
+                        slotElement.classList.add('occupied');
+                        slotElement.textContent = `${slot} ${occupiedSlots[slot]}`;  // Display name in occupied slot
+                    }
+                }
+            }
+        }).catch(error => {
+            console.error("Error fetching slots:", error);
+        });
     }
 
     // Toggle slot selection
@@ -167,11 +183,15 @@
                 });
             }
 
-            // Disable selected slots and mark them with the name
+            // Save the slot state to Firebase as occupied
             selectedSlots.forEach(slot => {
                 const slotElement = document.querySelector(`[data-slot="${slot}"]`);
                 slotElement.classList.add('occupied');
-                slotElement.textContent = `${slot} ${name}`;  // Update the slot text
+                slotElement.textContent = `${slot} ${name}`;  // Update the slot text in UI
+
+                // Save slot to Firebase as occupied
+                const slotRef = ref(db, 'slots/' + slot);
+                set(slotRef, name);
             });
 
             // Reset selection and update summary
