@@ -50,17 +50,16 @@
         /* Slot styling */
         .slot {
             display: inline-block;
-            padding: 8px 12px;
-            margin: 5px;
+            padding: 15px;
+            margin: 1px;
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            width: 70px; /* Adjusted to make the slot smaller */
-            height: 40px;
-            box-sizing: border-box;
+            box-sizing: border-box;  /* Ensures padding and border are included in the width/height */
             border-radius: 5px;
-            font-size: 12px;
+            font-size: 18px;
             text-align: center;
+            width: 100%; /* Ensures full width within its grid cell */
             white-space: nowrap; /* Prevents overflow of text */
         }
 
@@ -82,8 +81,8 @@
         /* Grid layout for 5 slots per row */
         .slots-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
             padding: 20px 0;
             max-width: 100%;
             justify-content: center;
