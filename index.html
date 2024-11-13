@@ -20,23 +20,13 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        .slotsContainer {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .column {
-            display: flex;
-            flex-direction: column;
-            margin: 10px;
-        }
         .slot {
-            margin: 5px;
+            margin: 10px;
             padding: 10px;
             background-color: #f1f1f1;
             border-radius: 5px;
+            display: inline-block;
             cursor: pointer;
-            text-align: left;
         }
         .selected {
             background-color: #4CAF50;
@@ -71,7 +61,7 @@
         <h3>Total Slots Available: 100</h3>
         <h3>50 AED per slot</h3>
 
-        <div id="slotsContainer" class="slotsContainer">
+        <div id="slotsContainer">
             <!-- Slots will be dynamically added here -->
         </div>
 
@@ -82,7 +72,42 @@
         <button class="button" onclick="submitForm()">Submit</button>
 
         <div id="statusMessage"></div>
+
+        <!-- Table for tracking selections -->
+        <table id="selectionTable">
+            <thead>
+                <tr>
+                    <th>Slot Number</th>
+                    <th>Player Name</th>
+                    <th>Amount (AED)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows for each selected slot will be added here -->
+            </tbody>
+        </table>
     </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js"></script> <!-- Firestore SDK -->
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAkrv_onib6NNq2QEd1TPYgbmr3Nt_FJh0",
+        authDomain: "md-raffle.firebaseapp.com",
+        databaseURL: "https://md-raffle-default-rtdb.firebaseio.com",
+        projectId: "md-raffle",
+        storageBucket: "md-raffle.firebasestorage.app",
+        messagingSenderId: "469756144780",
+        appId: "1:469756144780:web:b2892c0e3808628d429fa9",
+        measurementId: "G-KHQBQ730PG"
+      };
+
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
 
     <script>
         const totalSlots = 100;
@@ -93,32 +118,15 @@
         // Function to generate slots
         function createSlots() {
             const slotsContainer = document.getElementById('slotsContainer');
-            let column = document.createElement('div');
-            column.classList.add('column');
-
             for (let i = 1; i <= totalSlots; i++) {
                 const slot = document.createElement('div');
                 slot.classList.add('slot');
-                slot.textContent = i; // Just the number, no "Slot"
+                slot.textContent = `${i}`;
                 slot.setAttribute('data-slot', i);
-                slot.setAttribute('data-user', ''); // Initially no user
                 slot.onclick = function () {
                     toggleSlotSelection(i);
                 };
-
-                column.appendChild(slot);
-
-                // After 10 slots, create a new column
-                if (i % 10 === 0) {
-                    slotsContainer.appendChild(column);
-                    column = document.createElement('div');
-                    column.classList.add('column');
-                }
-            }
-
-            // Append the last column if it has fewer than 10 items
-            if (column.children.length > 0) {
-                slotsContainer.appendChild(column);
+                slotsContainer.appendChild(slot);
             }
         }
 
@@ -156,16 +164,11 @@
                 return;
             }
 
-            // Update the slots with the user's name
-            selectedSlots.forEach(slotNumber => {
-                const slotElement = document.querySelector(`[data-slot="${slotNumber}"]`);
-                slotElement.textContent = `${slotNumber} - ${name}`; // Show slot number and user name
-                slotElement.setAttribute('data-user', name); // Store the user name in the attribute
-            });
-
             users.push({ name: name, slots: selectedSlots });
             updateStatusMessage(name);
             resetSelection();
+            updateSelectionTable(name);
+            saveSelectionToFirestore(name);
         }
 
         // Show payment status
@@ -178,6 +181,35 @@
         function resetSelection() {
             selectedSlots = [];
             updateSummary();
+        }
+
+        // Update selection table with user and their selected slots
+        function updateSelectionTable(name) {
+            const tableBody = document.querySelector('#selectionTable tbody');
+            selectedSlots.forEach(slot => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${slot}</td>
+                    <td>${name}</td>
+                    <td>${slotPrice} AED</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Save the selection to Firebase Firestore
+        function saveSelectionToFirestore(name) {
+            selectedSlots.forEach(slot => {
+                db.collection("raffle").add({
+                    slot: slot,
+                    name: name,
+                    amount: slotPrice
+                }).then(() => {
+                    console.log("Selection saved to Firebase!");
+                }).catch((error) => {
+                    console.error("Error saving selection: ", error);
+                });
+            });
         }
 
         // Initialize page
