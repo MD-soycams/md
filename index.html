@@ -20,12 +20,17 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+        .slotsContainer {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr); /* 10 columns per row */
+            gap: 10px;
+            margin-bottom: 20px;
+        }
         .slot {
             margin: 10px;
             padding: 10px;
             background-color: #f1f1f1;
             border-radius: 5px;
-            display: inline-block;
             cursor: pointer;
         }
         .selected {
@@ -45,6 +50,36 @@
         .status {
             color: green;
         }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            text-align: left;
+            background-color: #f4f4f4;
+        }
+        td {
+            text-align: center;
+        }
+        .paid-button, .unpaid-button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .paid-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .unpaid-button {
+            background-color: #f44336;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -61,7 +96,7 @@
         <h3>Total Slots Available: 100</h3>
         <h3>50 AED per slot</h3>
 
-        <div id="slotsContainer">
+        <div id="slotsContainer" class="slotsContainer">
             <!-- Slots will be dynamically added here -->
         </div>
 
@@ -80,6 +115,7 @@
                     <th>Slot Number</th>
                     <th>Player Name</th>
                     <th>Amount (AED)</th>
+                    <th>Payment Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -191,29 +227,6 @@
                 row.innerHTML = `
                     <td>${slot}</td>
                     <td>${name}</td>
-                    <td>${slotPrice} AED</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Save the selection to Firebase Firestore
-        function saveSelectionToFirestore(name) {
-            selectedSlots.forEach(slot => {
-                db.collection("raffle").add({
-                    slot: slot,
-                    name: name,
-                    amount: slotPrice
-                }).then(() => {
-                    console.log("Selection saved to Firebase!");
-                }).catch((error) => {
-                    console.error("Error saving selection: ", error);
-                });
-            });
-        }
-
-        // Initialize page
-        createSlots();
-    </script>
-</body>
-</html>
+                    <td>${slotPrice}</td>
+                    <td><button class="paid-button" onclick="updatePaymentStatus('${name}', ${slot}, true)">Paid</button> 
+                    <button class="unpaid-button" onclick="updatePaymentStatus('${name}', ${slot}, false)">Unpaid</button></td>
