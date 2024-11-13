@@ -11,7 +11,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         /* Main container */
         .container {
             text-align: center;
@@ -50,15 +50,15 @@
         /* Slot styling */
         .slot {
             display: inline-block;
-            padding: 15px;
+            padding: 10px 15px;
             margin: 5px;
             background-color: lightblue;
             border: 1px solid #ccc;
             cursor: pointer;
-            width: calc(10% - 10px);
+            width: calc(10% - 10px); /* 10 columns */
             box-sizing: border-box;
             border-radius: 5px;
-            font-size: 18px;
+            font-size: 14px;
             text-align: center;
         }
 
@@ -77,7 +77,7 @@
             color: #fff;
         }
 
-        /* Grid layout for 10 slots per column */
+        /* Grid layout for 10 slots per row */
         .slots-container {
             display: grid;
             grid-template-columns: repeat(10, 1fr); /* 10 columns */
@@ -139,13 +139,21 @@
             border-radius: 5px;
             border: 1px solid #ccc;
         }
+
+        /* Logo styling */
+        .logo {
+            max-width: 120px;  /* Ensures the logo is not too large */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <!-- Logo Image -->
-    <img src="https://app.gemoo.com/share/image-annotation/715453896404959232?codeId=v6xw9EXwJ6Gbz&origin=imageurlgenerator&card=715453893875793920" alt="Logo" style="max-width: 150px; position: absolute; top: 20px; left: 20px;">
+    <img src="https://app.gemoo.com/share/image-annotation/715453896404959232?codeId=v6xw9EXwJ6Gbz&origin=imageurlgenerator&card=715453893875793920" alt="Logo" class="logo">
 
     <h1>Mighty David 7th Raffle Bonanza</h1>
 
@@ -251,67 +259,68 @@
             selectedSlots = selectedSlots.filter(s => s !== slotNumber);
             document.querySelector(`[data-slot="${slotNumber}"]`).classList.remove('selected');
         } else {
-            if (selectedSlots.length < 5) {  // Max 5 slots
+            if (selectedSlots.length < 20) {  // Max 20 slots
                 selectedSlots.push(slotNumber);
                 document.querySelector(`[data-slot="${slotNumber}"]`).classList.add('selected');
             } else {
-                alert('You can only select up to 5 slots!');
+                alert('You can only select up to 20 slots!');
             }
         }
-        updateSummary();
+        updateSlotInfo();
     }
 
-    // Update selected slots and total amount
-    function updateSummary() {
-        document.getElementById('selectedCount').textContent = selectedSlots.length;
-        document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
+    // Update slot info
+    function updateSlotInfo() {
+        const selectedCount = document.getElementById('selectedCount');
+        const totalAmount = document.getElementById('totalAmount');
+        selectedCount.textContent = selectedSlots.length;
+        totalAmount.textContent = selectedSlots.length * slotPrice;
     }
 
-    // Submit form with name and selected slots
-    async function submitForm() {
+    // Handle submit
+    document.getElementById('submitBtn').onclick = function () {
         const name = document.getElementById('nameInput').value;
-        if (name === "") {
-            alert("Please enter your name!");
+        if (!name) {
+            alert('Please enter your name!');
             return;
         }
+
+        // Check if slots are selected
         if (selectedSlots.length === 0) {
-            alert("Please select at least one slot!");
+            alert('Please select at least one slot!');
             return;
         }
 
-        // Store user data in Firebase
-        const userRef = ref(db, 'users/' + name);
-        const userData = {
-            name: name,
-            slots: selectedSlots
-        };
-
-        await set(userRef, userData);
-
-        // Update slots as occupied in Firebase
-        selectedSlots.forEach(async slot => {
-            const slotRef = ref(db, 'slots/' + slot);
-            await set(slotRef, name);  // Set the slot with the user's name
+        // Write user data to Firebase
+        const selectedSlotsStr = selectedSlots.join(',');
+        selectedSlots.forEach(slot => {
+            const updates = {};
+            updates[`/slots/${slot}`] = name;
+            update(ref(db), updates);
         });
 
-        // Add user to participants table
-        addParticipantToTable(name, selectedSlots);
+        // Display user in the participants list
+        users.push({ name, slots: selectedSlotsStr });
+        updateParticipantsTable();
 
-        alert('Your participation has been confirmed!');
+        // Clear selections and input
+        document.getElementById('nameInput').value = '';
+        selectedSlots = [];
+        createSlots();
+        updateSlotInfo();
+        alert('Your entry has been submitted!');
+    };
+
+    // Update the participants table
+    function updateParticipantsTable() {
+        const tableBody = document.querySelector('#participantsTable tbody');
+        tableBody.innerHTML = '';
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${user.slots}</td><td>${user.name}</td><td>${user.slots.split(',').length * slotPrice}</td><td>Pending</td>`;
+            tableBody.appendChild(row);
+        });
     }
-
-    // Add participant to table
-    function addParticipantToTable(name, selectedSlots) {
-        const table = document.getElementById("participantsTable").getElementsByTagName('tbody')[0];
-        const row = table.insertRow();
-        row.insertCell(0).textContent = selectedSlots.join(", ");
-        row.insertCell(1).textContent = name;
-        row.insertCell(2).textContent = selectedSlots.length * slotPrice + " AED";
-        row.insertCell(3).textContent = 'No';  // Payment status initially set to "No"
-    }
-
-    // Event listener for the submit button
-    document.getElementById('submitBtn').onclick = submitForm;
 
     // Initialize the page
     createSlots();
