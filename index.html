@@ -73,6 +73,7 @@
             background-color: gray;
             pointer-events: none;
             color: #fff;
+            text-align: center;
         }
 
         .slots-container {
@@ -266,7 +267,7 @@
         });
     }
 
-    // Toggle slot selection
+    // Toggle slot selection and mark it as occupied
     function toggleSlotSelection(slot) {
         const index = selectedSlots.indexOf(slot);
         if (index === -1) {
@@ -280,72 +281,80 @@
         updateTotalAmount();
     }
 
-    // Update slot display
+    // Update the slot display (disable selected ones)
     function updateSlotDisplay() {
-        const slotsContainer = document.getElementById('slotsContainer');
-        const selectedCountElement = document.getElementById('selectedCount');
-        selectedCountElement.textContent = selectedSlots.length;
-        slotsContainer.querySelectorAll('.slot').forEach(slot => {
-            const slotNumber = parseInt(slot.getAttribute('data-slot'));
+        const slots = document.querySelectorAll('.slot');
+        slots.forEach(slot => {
+            const slotNumber = parseInt(slot.textContent);
             if (selectedSlots.includes(slotNumber)) {
                 slot.classList.add('selected');
+                slot.classList.remove('occupied');
             } else {
                 slot.classList.remove('selected');
             }
         });
+        document.getElementById('selectedCount').textContent = selectedSlots.length;
     }
 
-    // Update total amount
+    // Update total amount to pay
     function updateTotalAmount() {
-        const totalAmountElement = document.getElementById('totalAmount');
-        totalAmountElement.textContent = selectedSlots.length * slotPrice;
+        const totalAmount = selectedSlots.length * slotPrice;
+        document.getElementById('totalAmount').textContent = totalAmount;
     }
 
-    // Submit selected slots to Firebase
-    document.getElementById('submitBtn').onclick = function () {
-        const name = document.getElementById('nameInput').value.trim();
-        if (name && selectedSlots.length > 0) {
-            const totalAmount = selectedSlots.length * slotPrice;
-            const participant = {
-                name: name,
-                slotNumbers: selectedSlots,
-                amountToPay: totalAmount,
-                paymentStatus: "Pending"
-            };
-
-            // Save to Firebase
-            const newParticipantKey = Date.now();
-            set(ref(db, 'participants/' + newParticipantKey), participant);
-
-            // Mark selected slots as occupied
-            selectedSlots.forEach(slot => {
+    // Add participant to Firebase
+    function addParticipant(name, slots) {
+        const slotNumbers = slots.join(", ");
+        const amountToPay = slots.length * slotPrice;
+        const newKey = Date.now().toString(); // Generate unique key for participant
+        set(ref(db, 'participants/' + newKey), {
+            slotNumbers: slots,
+            name: name,
+            amountToPay: amountToPay,
+            paymentStatus: "Pending"
+        }).then(() => {
+            alert('Your slots have been successfully booked!');
+            fetchParticipants(); // Refresh participant list
+            // Disable selected slots in Firebase as occupied
+            slots.forEach(slot => {
                 set(ref(db, 'slots/' + slot), name);
             });
-
-            selectedSlots = [];
-            updateSlotDisplay();
-            updateTotalAmount();
-            document.getElementById('nameInput').value = '';
-            fetchParticipants();
-        }
-    };
-
-    // Remove participant and free up slots
-    function removeParticipant(participantKey, slotNumbers) {
-        // Remove participant from the database
-        remove(ref(db, 'participants/' + participantKey));
-
-        // Free up the slots
-        slotNumbers.forEach(slot => {
-            remove(ref(db, 'slots/' + slot));
+        }).catch(error => {
+            console.error("Error adding participant:", error);
         });
-
-        fetchParticipants();
     }
 
+    // Remove participant and free up their slots
+    function removeParticipant(key, slots) {
+        remove(ref(db, 'participants/' + key)).then(() => {
+            alert('Participant removed successfully');
+            fetchParticipants(); // Refresh participant list
+            slots.forEach(slot => {
+                remove(ref(db, 'slots/' + slot));
+            });
+        }).catch(error => {
+            console.error("Error removing participant:", error);
+        });
+    }
+
+    // Handle the submit button click
+    document.getElementById('submitBtn').onclick = function () {
+        const name = document.getElementById('nameInput').value.trim();
+        if (name === '') {
+            alert('Please enter your name');
+            return;
+        }
+        if (selectedSlots.length === 0) {
+            alert('Please select at least one slot');
+            return;
+        }
+        addParticipant(name, selectedSlots);
+    };
+
+    // Initialize the page
     createSlots();
     fetchParticipants();
-</script>
 
+</script>
 </body>
 </html>
