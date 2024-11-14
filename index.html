@@ -229,7 +229,7 @@
                     const slotElement = document.querySelector(`[data-slot="${slot}"]`);
                     if (slotElement) {
                         slotElement.classList.add('occupied');
-                        slotElement.textContent = `${slot} - Taken by ${occupiedSlots[slot]}`;
+                        slotElement.textContent = `${slot} - ${occupiedSlots[slot]}`;
                     }
                 }
             }
