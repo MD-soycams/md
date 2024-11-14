@@ -207,36 +207,37 @@
     let selectedSlots = [];
     let users = {};
 
-    // Function to create slots
-    function createSlots() {
-        const slotsContainer = document.getElementById('slotsContainer');
-        for (let i = 1; i <= totalSlots; i++) {
-            const slot = document.createElement('div');
-            slot.classList.add('slot');
-            slot.textContent = i;
-            slot.setAttribute('data-slot', i);
-            slot.onclick = function () {
-                toggleSlotSelection(i);
-            };
-            slotsContainer.appendChild(slot);
-        }
+// Function to create slots
+function createSlots() {
+    const slotsContainer = document.getElementById('slotsContainer');
+    for (let i = 1; i <= totalSlots; i++) {
+        const slot = document.createElement('div');
+        slot.classList.add('slot');
+        slot.textContent = i;
+        slot.setAttribute('data-slot', i);
+        slot.onclick = function () {
+            toggleSlotSelection(i);
+        };
+        slotsContainer.appendChild(slot);
+    }
 
-        // Read slot data from Firebase to disable occupied slots
-        get(child(dbRef, 'slots')).then(snapshot => {
-            if (snapshot.exists()) {
-                const occupiedSlots = snapshot.val();
-                for (const slot in occupiedSlots) {
-                    const slotElement = document.querySelector(`[data-slot="${slot}"]`);
-                    if (slotElement) {
-                        slotElement.classList.add('occupied');
-                        slotElement.textContent = `${slot} - ${occupiedSlots[slot]}`;
-                    }
+    // Read slot data from Firebase to disable occupied slots
+    get(child(dbRef, 'slots')).then(snapshot => {
+        if (snapshot.exists()) {
+            const occupiedSlots = snapshot.val();
+            for (const slot in occupiedSlots) {
+                const slotElement = document.querySelector(`[data-slot="${slot}"]`);
+                if (slotElement) {
+                    slotElement.classList.add('occupied');
+                    slotElement.textContent = `${slot}`; // Removed "Taken by"
                 }
             }
-        }).catch(error => {
-            console.error("Error fetching slots:", error);
-        });
-    }
+        }
+    }).catch(error => {
+        console.error("Error fetching slots:", error);
+    });
+}
+
 
     // Fetch the participant list from Firebase and display it
     function fetchParticipants() {
