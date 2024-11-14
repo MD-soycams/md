@@ -207,156 +207,128 @@
     let selectedSlots = [];
     let users = {};
 
-// Function to create slots
-function createSlots() {
-    const slotsContainer = document.getElementById('slotsContainer');
-    for (let i = 1; i <= totalSlots; i++) {
-        const slot = document.createElement('div');
-        slot.classList.add('slot');
-        slot.textContent = i;
-        slot.setAttribute('data-slot', i);
-        slot.onclick = function () {
-            toggleSlotSelection(i);
-        };
-        slotsContainer.appendChild(slot);
-    }
-
-    // Read slot data from Firebase to disable occupied slots
-    get(child(dbRef, 'slots')).then(snapshot => {
-        if (snapshot.exists()) {
-            const occupiedSlots = snapshot.val();
-            for (const slot in occupiedSlots) {
-                const slotElement = document.querySelector(`[data-slot="${slot}"]`);
-                if (slotElement) {
-                    slotElement.classList.add('occupied');
-                    slotElement.textContent = `${slot}`; // Removed "Taken by"
-                }
-            }
+    function createSlots() {
+        const slotsContainer = document.getElementById('slotsContainer');
+        for (let i = 1; i <= totalSlots; i++) {
+            const slot = document.createElement('div');
+            slot.classList.add('slot');
+            slot.textContent = i;
+            slot.setAttribute('data-slot', i);
+            slot.onclick = function () {
+                toggleSlotSelection(i);
+            };
+            slotsContainer.appendChild(slot);
         }
-    }).catch(error => {
-        console.error("Error fetching slots:", error);
-    });
-}
 
-
-    // Fetch the participant list from Firebase and display it
-    function fetchParticipants() {
-        get(child(dbRef, 'participants')).then(snapshot => {
+        get(child(dbRef, 'slots')).then(snapshot => {
             if (snapshot.exists()) {
-                const participants = snapshot.val();
-                const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-                tableBody.innerHTML = ''; // Clear existing rows
-                for (const key in participants) {
-                    const participant = participants[key];
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = participant.slotNumbers.join(", ");
-                    row.insertCell(1).textContent = participant.name;
-                    row.insertCell(2).textContent = participant.amountToPay;
-                    row.insertCell(3).textContent = participant.paymentStatus;
-
-                    const statusCell = row.insertCell(3);
-                    const statusSelect = document.createElement('select');
-                    const option1 = document.createElement('option');
-                    option1.value = 'Pending';
-                    option1.textContent = 'Pending';
-                    const option2 = document.createElement('option');
-                    option2.value = 'Paid';
-                    option2.textContent = 'Paid';
-                    statusSelect.appendChild(option1);
-                    statusSelect.appendChild(option2);
-                    statusSelect.value = participant.paymentStatus;
-
-                    statusSelect.onchange = function() {
-                        updatePaymentStatus(key, statusSelect.value);
-                    };
-                    statusCell.appendChild(statusSelect);
-
-                    const removeCell = row.insertCell(4);
-                    const removeButton = document.createElement('button');
-                    removeButton.textContent = 'Remove';
-                    removeButton.onclick = function () {
-                        removeParticipant(key, participant.slotNumbers);
-                    };
-                    removeCell.appendChild(removeButton);
+                const occupiedSlots = snapshot.val();
+                for (const slot in occupiedSlots) {
+                    const slotElement = document.querySelector(`[data-slot="${slot}"]`);
+                    if (slotElement) {
+                        slotElement.classList.add('occupied');
+                        slotElement.textContent = `${slot}`; 
+                    }
                 }
             }
         }).catch(error => {
-            console.error("Error fetching participants:", error);
+            console.error("Error fetching slots:", error);
         });
     }
 
-    // Function to toggle slot selection
     function toggleSlotSelection(slotNumber) {
         const slot = document.querySelector(`[data-slot="${slotNumber}"]`);
-        if (slot.classList.contains('occupied') || selectedSlots.includes(slotNumber)) {
+        const name = document.getElementById('nameInput').value.trim();
+
+        if (slot.classList.contains('occupied') || selectedSlots.some(s => s.slot === slotNumber)) {
             return;
         }
+
         if (slot.classList.contains('selected')) {
             slot.classList.remove('selected');
-            selectedSlots = selectedSlots.filter(s => s !== slotNumber);
+            selectedSlots = selectedSlots.filter(s => s.slot !== slotNumber);
         } else {
-            slot.classList.add('selected');
-            selectedSlots.push(slotNumber);
+            if (name) {
+                slot.classList.add('selected');
+                selectedSlots.push({ slot: slotNumber, name: name });
+                slot.textContent = `${slotNumber} (Selected by ${name})`; 
+            } else {
+                alert("Please enter your name.");
+            }
         }
 
         document.getElementById('selectedCount').textContent = selectedSlots.length;
         document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
     }
 
-    // Handle form submission and add participant to Firebase
-    document.getElementById('submitBtn').onclick = function() {
+    document.getElementById('submitBtn').onclick = function () {
         const name = document.getElementById('nameInput').value.trim();
         if (name && selectedSlots.length > 0) {
             const participantId = Date.now();
             const participantData = {
                 name: name,
-                slotNumbers: selectedSlots,
+                slotNumbers: selectedSlots.map(s => s.slot),
                 amountToPay: selectedSlots.length * slotPrice,
                 paymentStatus: 'Pending'
             };
 
             set(ref(db, 'participants/' + participantId), participantData).then(() => {
-                selectedSlots.forEach(slotNumber => {
-                    set(ref(db, 'slots/' + slotNumber), name); // Mark slot as occupied
+                selectedSlots.forEach(slotData => {
+                    set(ref(db, 'slots/' + slotData.slot), slotData.name); 
                 });
                 selectedSlots = [];
                 document.getElementById('nameInput').value = '';
                 document.getElementById('selectedCount').textContent = 0;
                 document.getElementById('totalAmount').textContent = 0;
-                fetchParticipants();
-            }).catch(error => {
-                console.error("Error adding participant:", error);
+                alert('Your selection has been submitted!');
+
+                loadParticipants(); 
+            }).catch((error) => {
+                alert('Error submitting your selection: ' + error.message);
             });
+        } else {
+            alert("Please enter your name and select at least one slot.");
         }
-    }
+    };
 
-    // Update payment status in Firebase
-    function updatePaymentStatus(participantId, newStatus) {
-        const participantRef = ref(db, 'participants/' + participantId);
-        update(participantRef, { paymentStatus: newStatus }).then(() => {
-            console.log("Payment status updated successfully.");
-        }).catch(error => {
-            console.error("Error updating payment status:", error);
+    function loadParticipants() {
+        get(child(dbRef, 'participants')).then(snapshot => {
+            if (snapshot.exists()) {
+                const participants = snapshot.val();
+                const participantsTableBody = document.querySelector("#participantsTable tbody");
+                participantsTableBody.innerHTML = '';
+
+                Object.keys(participants).forEach(participantId => {
+                    const participant = participants[participantId];
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${participant.slotNumbers.join(', ')}</td>
+                        <td>${participant.name}</td>
+                        <td>${participant.amountToPay}</td>
+                        <td>${participant.paymentStatus}</td>
+                        <td><button onclick="deleteParticipant('${participantId}')">Delete</button></td>
+                    `;
+                    participantsTableBody.appendChild(row);
+                });
+            }
+        }).catch((error) => {
+            console.error("Error loading participants: ", error);
         });
     }
 
-    // Remove participant from Firebase and free up slots
-    function removeParticipant(participantId, slotNumbers) {
-        const participantRef = ref(db, 'participants/' + participantId);
-        remove(participantRef).then(() => {
-            slotNumbers.forEach(slotNumber => {
-                remove(ref(db, 'slots/' + slotNumber));
-            });
-            fetchParticipants();
-        }).catch(error => {
-            console.error("Error removing participant:", error);
+    function deleteParticipant(participantId) {
+        remove(ref(db, 'participants/' + participantId)).then(() => {
+            alert('Participant deleted');
+            loadParticipants();
+        }).catch((error) => {
+            console.error("Error deleting participant:", error);
         });
     }
 
-    // Initialize the page
     createSlots();
-    fetchParticipants();
-
+    loadParticipants();
 </script>
+
 </body>
 </html>
