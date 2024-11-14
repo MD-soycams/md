@@ -251,7 +251,7 @@
             if (name) {
                 slot.classList.add('selected');
                 selectedSlots.push({ slot: slotNumber, name: name });
-                slot.textContent = `${slotNumber}`;
+                slot.textContent = `${slotNumber} (${name})`;  // Display only the number and name
             } else {
                 alert("Please enter your name.");
             }
@@ -281,54 +281,51 @@
                 document.getElementById('selectedCount').textContent = 0;
                 document.getElementById('totalAmount').textContent = 0;
                 alert('Your selection has been submitted!');
-
-                loadParticipants(); 
-            }).catch((error) => {
-                alert('Error submitting your selection: ' + error.message);
+                updateParticipantsTable();
+            }).catch(error => {
+                console.error("Error submitting participant data:", error);
             });
         } else {
-            alert("Please enter your name and select at least one slot.");
+            alert('Please enter your name and select at least one slot!');
         }
     };
 
-    function loadParticipants() {
+    function updateParticipantsTable() {
         get(child(dbRef, 'participants')).then(snapshot => {
             if (snapshot.exists()) {
                 const participants = snapshot.val();
-                const participantsTableBody = document.querySelector("#participantsTable tbody");
-                participantsTableBody.innerHTML = '';
-
-                Object.keys(participants).forEach(participantId => {
+                const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = '';
+                for (const participantId in participants) {
                     const participant = participants[participantId];
                     const row = document.createElement('tr');
-
                     row.innerHTML = `
                         <td>${participant.slotNumbers.join(', ')}</td>
                         <td>${participant.name}</td>
-                        <td>${participant.amountToPay}</td>
+                        <td>${participant.amountToPay} AED</td>
                         <td>${participant.paymentStatus}</td>
                         <td><button onclick="deleteParticipant('${participantId}')">Delete</button></td>
                     `;
-                    participantsTableBody.appendChild(row);
-                });
+                    tableBody.appendChild(row);
+                }
             }
-        }).catch((error) => {
-            console.error("Error loading participants: ", error);
+        }).catch(error => {
+            console.error("Error fetching participants:", error);
         });
     }
 
     function deleteParticipant(participantId) {
         remove(ref(db, 'participants/' + participantId)).then(() => {
-            alert('Participant deleted');
-            loadParticipants();
-        }).catch((error) => {
+            alert("Participant removed");
+            updateParticipantsTable();
+        }).catch(error => {
             console.error("Error deleting participant:", error);
         });
     }
 
+    // Initialize slots and update table
     createSlots();
-    loadParticipants();
+    updateParticipantsTable();
 </script>
-
 </body>
 </html>
