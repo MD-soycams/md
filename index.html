@@ -337,9 +337,9 @@
 
             <div class="prizes-info">
                 <h3>PRIZES:</h3>
-                <p>1st Prize: 500 AED</p>
-                <p>2nd Prize: 200 AED</p>
-                <p>3 Consolation Prizes: 100 AED</p>
+                <div id="prizesList">
+                    <!-- Month-specific prizes will be displayed here -->
+                </div>
                 <div id="prizeDetails">
                     <!-- Month-specific prize details will be displayed here -->
                 </div>
@@ -414,29 +414,52 @@
             slotPrice: 50,
             totalAmount: 3500,
             prizes: 1000,
-            sinkingFunds: 2500
+            sinkingFunds: 2500,
+            prizeStructure: {
+                first: 500,
+                second: 200,
+                consolation: 100,
+                consolationCount: 3
+            }
         },
         april: {
             totalSlots: 70,
             slotPrice: 50,
             totalAmount: 3500,
             prizes: 1000,
-            sinkingFunds: 2500
+            sinkingFunds: 2500,
+            prizeStructure: {
+                first: 500,
+                second: 200,
+                consolation: 100,
+                consolationCount: 3
+            }
         },
         may: {
             totalSlots: 70,
             slotPrice: 50,
             totalAmount: 3500,
             prizes: 1000,
-            sinkingFunds: 2500
+            sinkingFunds: 2500,
+            prizeStructure: {
+                first: 500,
+                second: 200,
+                consolation: 100,
+                consolationCount: 3
+            }
         },
-
         june: {
             totalSlots: 100,
             slotPrice: 100,
             totalAmount: 10000,
             prizes: 2000,
-            sinkingFunds: 8000
+            sinkingFunds: 3000,
+            prizeStructure: {
+                first: 1000,
+                second: 400,
+                consolation: 200,
+                consolationCount: 3
+            }
         }
     };
 
@@ -472,12 +495,20 @@
     // Update month-specific information
     function updateMonthInfo() {
         const config = monthConfig[currentMonth];
+        const prizeStructure = config.prizeStructure;
         
         // Update month info
         document.getElementById('monthInfo').innerHTML = `
             <p><strong>${currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} 2025 Raffle</strong></p>
             <p>Total Slots: ${config.totalSlots}</p>
             <p>Price per Slot: ${config.slotPrice} AED</p>
+        `;
+        
+        // Update prize list
+        document.getElementById('prizesList').innerHTML = `
+            <p>1st Prize: ${prizeStructure.first} AED</p>
+            <p>2nd Prize: ${prizeStructure.second} AED</p>
+            <p>${prizeStructure.consolationCount} Consolation Prizes: ${prizeStructure.consolation} AED each</p>
         `;
         
         // Update prize details
