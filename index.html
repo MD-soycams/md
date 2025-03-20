@@ -3,185 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mighty David 7th Raffle Bonanza</title>
+    <title>Mighty David Raffle Bonanza 2025</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+        /* Base styles */
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
-        .container {
-            text-align: center;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 36px;
-            font-weight: bold;
-            color: #2c3e50;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
-        .prizes-info {
-            background-color: #2980b9;
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 18px;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
             line-height: 1.5;
         }
 
-        .prizes-info h3 {
-            font-size: 28px;
-            margin-bottom: 10px;
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
         }
 
-        .slot {
-            display: inline-block;
-            padding: 15px;
-            margin: 1px;
-            background-color: lightblue;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            box-sizing: border-box;
-            border-radius: 5px;
-            font-size: 18px;
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            color: white;
+            padding: 20px;
             text-align: center;
-            width: 100%;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        /* Tab styles */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
             white-space: nowrap;
         }
 
-        .slot:hover {
-            background-color: #3498db;
-            color: white;
+        .tab:hover {
+            color: #2563eb;
         }
 
-        .slot.selected {
-            background-color: yellow;
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
         }
 
-        .slot.occupied {
-            background-color: gray;
-            pointer-events: none;
-            color: #fff;
+        /* Prize info section */
+        .prizes-info {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .prizes-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .prizes-info p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Form elements */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 300px;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Slots grid */
+        .slots-heading {
+            font-weight: 500;
+            margin-bottom: 10px;
         }
 
         .slots-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            padding: 20px 0;
-            max-width: 100%;
-            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .slots-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .slots-container {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .card-title {
+                font-size: 2rem;
+            }
+        }
+
+        .slot {
+            padding: 8px 4px;
+            background-color: #dbeafe;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .slot:hover:not(.occupied) {
+            background-color: #bfdbfe;
+        }
+
+        .slot.selected {
+            background-color: #fef08a;
+        }
+
+        .slot.selected:hover {
+            background-color: #fde047;
+        }
+
+        .slot.occupied {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        /* Summary section */
+        .summary-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .summary-section {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Button styles */
+        .button {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .button {
+                width: auto;
+            }
+        }
+
+        .button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Table styles */
+        .table-container {
+            margin-top: 30px;
             overflow-x: auto;
         }
 
-        input[type="text"] {
-            padding: 10px;
-            margin: 10px 0;
-            width: 100%;
-            max-width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #2980b9;
+        .participants-heading {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 15px;
         }
 
         table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
+            font-size: 0.95rem;
         }
 
         th, td {
             padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         th {
-            background-color: #2980b9;
-            color: white;
+            background-color: #f9fafb;
+            font-weight: 600;
         }
 
-        td {
-            background-color: #ecf0f1;
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
         }
 
-        select {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        .status-pending {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+        }
+
+        .status-paid {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: #fee2e2;
+        }
+
+        /* Month info */
+        .month-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .month-info p {
+            margin: 5px 0;
+        }
+
+        .month-info strong {
+            color: #1e40af;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Mighty David 7th Raffle Bonanza</h1>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Mighty David Raffle Bonanza 2025</h1>
+        </div>
 
-    <div class="prizes-info">
-        <h3>PRIZES:</h3>
-        <p>1st Prize: 500 AED</p>
-        <p>2nd Prize: 300 AED</p>
-        <p>3rd Prize: 200 AED</p>
-        <p>5 Consolation Prizes: 100 AED</p>
-        <p>Total Slots - 100</p>
-        <p>50 AED per slot = 5000 AED</p>
-        <p>Prizes = 1500 AED</p>
-        <p>MD Funds = 3500 AED</p>
+        <div class="card-content">
+            <div class="tabs" id="monthTabs">
+                <button class="tab active" data-month="march">March 2025</button>
+                <button class="tab" data-month="april">April 2025</button>
+                <button class="tab" data-month="may">May 2025</button>
+                <button class="tab" data-month="june">June 2025</button>
+            </div>
+
+            <div class="month-info" id="monthInfo">
+                <!-- Month-specific info will be displayed here -->
+            </div>
+
+            <div class="prizes-info">
+                <h3>PRIZES:</h3>
+                <p>1st Prize: 500 AED</p>
+                <p>2nd Prize: 200 AED</p>
+                <p>3 Consolation Prizes: 100 AED</p>
+                <div id="prizeDetails">
+                    <!-- Month-specific prize details will be displayed here -->
+                </div>
+            </div>
+
+            <div>
+                <label for="nameInput">Enter your Name:</label>
+                <input type="text" id="nameInput" placeholder="Your Name" />
+            </div>
+
+            <div>
+                <h3 class="slots-heading">Select your slots:</h3>
+                <div class="slots-container" id="slotsContainer">
+                    <!-- Slots will be generated here -->
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <div>
+                    <p>Selected Slots: <span class="badge" id="selectedCount">0</span></p>
+                    <p>Total Amount: <span class="badge" id="totalAmount">0</span> AED</p>
+                </div>
+                <button class="button" id="submitBtn" disabled>Submit</button>
+            </div>
+
+            <div id="statusMessage"></div>
+
+            <div class="table-container">
+                <h3 class="participants-heading">Participants List:</h3>
+                <table id="participantsTable">
+                    <thead>
+                        <tr>
+                            <th>Slot Numbers</th>
+                            <th>Name</th>
+                            <th>Total to Pay (AED)</th>
+                            <th>Payment Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Participants will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-    <label for="nameInput">Enter your Name:</label>
-    <input type="text" id="nameInput" placeholder="Your Name" />
-
-    <div class="slots-container" id="slotsContainer"></div>
-
-    <div>
-        <p>Selected Slots: <span id="selectedCount">0</span></p>
-        <p>Total Amount: <span id="totalAmount">0</span> AED</p>
-    </div>
-
-    <button class="button" id="submitBtn">Submit</button>
-
-    <div id="statusMessage"></div>
-    <h3>Participants List:</h3>
-    <table id="participantsTable">
-        <thead>
-            <tr>
-                <th>Slot Numbers</th>
-                <th>Name</th>
-                <th>Total to Pay (AED)</th>
-                <th>Payment Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Participants will be displayed here -->
-        </tbody>
-    </table>
 </div>
 
 <script type="module">
@@ -203,15 +407,96 @@
     const db = getDatabase(app);
     const dbRef = ref(db);
 
-    const totalSlots = 100;
-    const slotPrice = 50;
+    // Configuration for each month
+    const monthConfig = {
+        march: {
+            totalSlots: 70,
+            slotPrice: 50,
+            totalAmount: 3500,
+            prizes: 1000,
+            sinkingFunds: 2500
+        },
+        april: {
+            totalSlots: 70,
+            slotPrice: 50,
+            totalAmount: 3500,
+            prizes: 1000,
+            sinkingFunds: 2500
+        },
+        may: {
+            totalSlots: 70,
+            slotPrice: 50,
+            totalAmount: 3500,
+            prizes: 1000,
+            sinkingFunds: 2500
+        },
+
+        june: {
+            totalSlots: 100,
+            slotPrice: 100,
+            totalAmount: 5000,
+            prizes: 2000,
+            sinkingFunds: 8000
+        }
+    };
+
+    let currentMonth = 'march';
     let selectedSlots = [];
-    let users = {};
+
+    // Initialize tabs
+    function initTabs() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Update current month
+                currentMonth = tab.getAttribute('data-month');
+                
+                // Reset selected slots
+                selectedSlots = [];
+                updateSummary();
+                
+                // Update UI for the selected month
+                updateMonthInfo();
+                createSlots();
+                updateParticipantsTable();
+            });
+        });
+    }
+
+    // Update month-specific information
+    function updateMonthInfo() {
+        const config = monthConfig[currentMonth];
+        
+        // Update month info
+        document.getElementById('monthInfo').innerHTML = `
+            <p><strong>${currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)} 2025 Raffle</strong></p>
+            <p>Total Slots: ${config.totalSlots}</p>
+            <p>Price per Slot: ${config.slotPrice} AED</p>
+        `;
+        
+        // Update prize details
+        document.getElementById('prizeDetails').innerHTML = `
+            <p>Total Slots - ${config.totalSlots}</p>
+            <p>${config.slotPrice} AED per slot = ${config.totalAmount} AED</p>
+            <p>Prizes = ${config.prizes} AED</p>
+            <p>MD Sinking Funds = ${config.sinkingFunds} AED</p>
+        `;
+    }
 
     function createSlots() {
         const slotsContainer = document.getElementById('slotsContainer');
+        slotsContainer.innerHTML = ''; // Clear existing slots
+        
+        const totalSlots = monthConfig[currentMonth].totalSlots;
+        
         for (let i = 1; i <= totalSlots; i++) {
-            const slot = document.createElement('div');
+            const slot = document.createElement('button');
             slot.classList.add('slot');
             slot.textContent = i;
             slot.setAttribute('data-slot', i);
@@ -221,14 +506,15 @@
             slotsContainer.appendChild(slot);
         }
 
-        get(child(dbRef, 'slots')).then(snapshot => {
+        // Get occupied slots for the current month
+        get(child(dbRef, `slots/${currentMonth}`)).then(snapshot => {
             if (snapshot.exists()) {
                 const occupiedSlots = snapshot.val();
                 for (const slot in occupiedSlots) {
                     const slotElement = document.querySelector(`[data-slot="${slot}"]`);
                     if (slotElement) {
                         slotElement.classList.add('occupied');
-                        slotElement.textContent = `${slot}`; 
+                        slotElement.textContent = slot;
                     }
                 }
             }
@@ -241,7 +527,12 @@
         const slot = document.querySelector(`[data-slot="${slotNumber}"]`);
         const name = document.getElementById('nameInput').value.trim();
 
-        if (slot.classList.contains('occupied') || selectedSlots.some(s => s.slot === slotNumber)) {
+        if (slot.classList.contains('occupied')) {
+            return;
+        }
+
+        if (!name) {
+            alert("Please enter your name first");
             return;
         }
 
@@ -249,40 +540,57 @@
             slot.classList.remove('selected');
             selectedSlots = selectedSlots.filter(s => s.slot !== slotNumber);
         } else {
-            if (name) {
-                slot.classList.add('selected');
-                selectedSlots.push({ slot: slotNumber, name: name });
-                slot.textContent = `${slotNumber} (${name})`;  // Display only the number and name
-            } else {
-                alert("Please enter your name.");
-            }
+            slot.classList.add('selected');
+            selectedSlots.push({ slot: slotNumber, name: name });
         }
 
+        updateSummary();
+        updateSubmitButton();
+    }
+
+    function updateSummary() {
         document.getElementById('selectedCount').textContent = selectedSlots.length;
+        const slotPrice = monthConfig[currentMonth].slotPrice;
         document.getElementById('totalAmount').textContent = selectedSlots.length * slotPrice;
     }
+
+    function updateSubmitButton() {
+        const name = document.getElementById('nameInput').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = !name || selectedSlots.length === 0;
+    }
+
+    document.getElementById('nameInput').addEventListener('input', updateSubmitButton);
 
     document.getElementById('submitBtn').onclick = function () {
         const name = document.getElementById('nameInput').value.trim();
         if (name && selectedSlots.length > 0) {
             const participantId = Date.now();
+            const slotPrice = monthConfig[currentMonth].slotPrice;
+            
             const participantData = {
                 name: name,
+                month: currentMonth,
                 slotNumbers: selectedSlots.map(s => s.slot),
                 amountToPay: selectedSlots.length * slotPrice,
                 paymentStatus: 'Pending'
             };
 
-            set(ref(db, 'participants/' + participantId), participantData).then(() => {
+            // Save participant data
+            set(ref(db, `participants/${currentMonth}/${participantId}`), participantData).then(() => {
+                // Mark slots as occupied
                 selectedSlots.forEach(slotData => {
-                    set(ref(db, 'slots/' + slotData.slot), slotData.name); 
+                    set(ref(db, `slots/${currentMonth}/${slotData.slot}`), slotData.name); 
                 });
+                
+                // Reset form
                 selectedSlots = [];
                 document.getElementById('nameInput').value = '';
-                document.getElementById('selectedCount').textContent = 0;
-                document.getElementById('totalAmount').textContent = 0;
+                updateSummary();
+                updateSubmitButton();
                 alert('Your selection has been submitted!');
                 updateParticipantsTable();
+                createSlots(); // Refresh slots to show newly occupied ones
             }).catch(error => {
                 console.error("Error submitting participant data:", error);
             });
@@ -292,23 +600,46 @@
     };
 
     function updateParticipantsTable() {
-        get(child(dbRef, 'participants')).then(snapshot => {
+        get(child(dbRef, `participants/${currentMonth}`)).then(snapshot => {
+            const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            
             if (snapshot.exists()) {
                 const participants = snapshot.val();
-                const tableBody = document.getElementById('participantsTable').getElementsByTagName('tbody')[0];
-                tableBody.innerHTML = '';
+                
                 for (const participantId in participants) {
                     const participant = participants[participantId];
                     const row = document.createElement('tr');
+                    
+                    const statusClass = participant.paymentStatus === 'Paid' 
+                        ? 'status-paid' 
+                        : 'status-pending';
+                    
                     row.innerHTML = `
                         <td>${participant.slotNumbers.join(', ')}</td>
                         <td>${participant.name}</td>
                         <td>${participant.amountToPay} AED</td>
-                        <td>${participant.paymentStatus}</td>
-                        <td><button onclick="deleteParticipant('${participantId}')">Delete</button></td>
+                        <td><span class="status-badge ${statusClass}">${participant.paymentStatus}</span></td>
+                        <td>
+                            <button class="delete-btn" data-id="${participantId}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 }
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const participantId = this.getAttribute('data-id');
+                        deleteParticipant(participantId);
+                    });
+                });
             }
         }).catch(error => {
             console.error("Error fetching participants:", error);
@@ -316,17 +647,41 @@
     }
 
     function deleteParticipant(participantId) {
-        remove(ref(db, 'participants/' + participantId)).then(() => {
-            alert("Participant removed");
-            updateParticipantsTable();
+        // First get the participant data to know which slots to free up
+        get(child(dbRef, `participants/${currentMonth}/${participantId}`)).then(snapshot => {
+            if (snapshot.exists()) {
+                const participant = snapshot.val();
+                
+                // Remove participant
+                remove(ref(db, `participants/${currentMonth}/${participantId}`)).then(() => {
+                    // Free up the slots
+                    participant.slotNumbers.forEach(slotNumber => {
+                        remove(ref(db, `slots/${currentMonth}/${slotNumber}`));
+                    });
+                    
+                    alert("Participant removed");
+                    updateParticipantsTable();
+                    createSlots(); // Refresh slots
+                }).catch(error => {
+                    console.error("Error deleting participant:", error);
+                });
+            }
         }).catch(error => {
-            console.error("Error deleting participant:", error);
+            console.error("Error fetching participant data:", error);
         });
     }
 
-    // Initialize slots and update table
-    createSlots();
-    updateParticipantsTable();
+    // Initialize the application
+    function init() {
+        initTabs();
+        updateMonthInfo();
+        createSlots();
+        updateParticipantsTable();
+        updateSubmitButton();
+    }
+
+    // Start the application
+    init();
 </script>
 </body>
 </html>
