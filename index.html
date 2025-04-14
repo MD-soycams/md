@@ -100,6 +100,35 @@
             font-size: 0.95rem;
         }
 
+        /* Winners info section */
+        .winners-info {
+            background-color: #f0fdf4;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #22c55e;
+        }
+
+        .winners-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #15803d;
+        }
+
+        .winners-info p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .winners-info ul {
+            margin: 5px 0 0 20px;
+        }
+
+        .winners-info li {
+            margin-bottom: 3px;
+        }
+
         /* Form elements */
         label {
             display: block;
@@ -325,8 +354,8 @@
 
         <div class="card-content">
             <div class="tabs" id="monthTabs">
-                <button class="tab active" data-month="march">March 2025</button>
-                <button class="tab" data-month="april">April 2025</button>
+                <button class="tab" data-month="march">March 2025</button>
+                <button class="tab active" data-month="april">April 2025</button>
                 <button class="tab" data-month="may">May 2025</button>
                 <button class="tab" data-month="june">June 2025</button>
             </div>
@@ -343,6 +372,18 @@
                 <div id="prizeDetails">
                     <!-- Month-specific prize details will be displayed here -->
                 </div>
+            </div>
+
+            <div id="winnersSection" style="display: none;" class="winners-info">
+                <h3>MARCH WINNERS:</h3>
+                <p>1st Prize (500 AED): #53 Zalde</p>
+                <p>2nd Prize (200 AED): #48 Arwa</p>
+                <p>Consolation Prizes (100 AED each):</p>
+                <ul>
+                    <li>#5 Kots Onin</li>
+                    <li>#10 Tolosa</li>
+                    <li>#27 Shai</li>
+                </ul>
             </div>
 
             <div>
@@ -416,36 +457,36 @@
             prizes: 1000,
             sinkingFunds: 2500,
             prizeStructure: {
-                first: 500,
-                second: 200,
-                consolation: 100,
+                first: "500 AED",
+                second: "200 AED",
+                consolation: "100 AED",
                 consolationCount: 3
             }
         },
         april: {
-            totalSlots: 70,
+            totalSlots: 100,
             slotPrice: 50,
-            totalAmount: 3500,
-            prizes: 1000,
-            sinkingFunds: 2500,
+            totalAmount: 5000,
+            prizes: 500,
+            sinkingFunds: 4500,
             prizeStructure: {
-                first: 500,
-                second: 200,
-                consolation: 100,
-                consolationCount: 3
+                first: "Samsung S22+ (Unwanted Gift - Unboxed)",
+                second: "S21 FE (Unwanted Gift - Unboxed)",
+                consolation: "100 AED",
+                consolationCount: 5
             }
         },
         may: {
-            totalSlots: 70,
+            totalSlots: 100,
             slotPrice: 50,
-            totalAmount: 3500,
-            prizes: 1000,
-            sinkingFunds: 2500,
+            totalAmount: 5000,
+            prizes: 500,
+            sinkingFunds: 4500,
             prizeStructure: {
-                first: 500,
-                second: 200,
-                consolation: 100,
-                consolationCount: 3
+                first: "Samsung S22+ (Unwanted Gift - Unboxed)",
+                second: "Samsung Watch (Unwanted Gift - Unboxed)",
+                consolation: "100 AED",
+                consolationCount: 5
             }
         },
         june: {
@@ -453,17 +494,17 @@
             slotPrice: 100,
             totalAmount: 10000,
             prizes: 2000,
-            sinkingFunds: 3000,
+            sinkingFunds: 8000,
             prizeStructure: {
-                first: 1000,
-                second: 400,
-                consolation: 200,
+                first: "1000 AED",
+                second: "400 AED",
+                consolation: "200 AED",
                 consolationCount: 3
             }
         }
     };
 
-    let currentMonth = 'march';
+    let currentMonth = 'april'; // Default to April since it's now April
     let selectedSlots = [];
 
     // Initialize tabs
@@ -488,6 +529,13 @@
                 updateMonthInfo();
                 createSlots();
                 updateParticipantsTable();
+                
+                // Show/hide winners section
+                if (currentMonth === 'march') {
+                    document.getElementById('winnersSection').style.display = 'block';
+                } else {
+                    document.getElementById('winnersSection').style.display = 'none';
+                }
             });
         });
     }
@@ -506,9 +554,9 @@
         
         // Update prize list
         document.getElementById('prizesList').innerHTML = `
-            <p>1st Prize: ${prizeStructure.first} AED</p>
-            <p>2nd Prize: ${prizeStructure.second} AED</p>
-            <p>${prizeStructure.consolationCount} Consolation Prizes: ${prizeStructure.consolation} AED each</p>
+            <p>1st Prize: ${prizeStructure.first}</p>
+            <p>2nd Prize: ${prizeStructure.second}</p>
+            <p>${prizeStructure.consolationCount} Consolation Prizes: ${prizeStructure.consolation} each</p>
         `;
         
         // Update prize details
@@ -709,6 +757,11 @@
         createSlots();
         updateParticipantsTable();
         updateSubmitButton();
+        
+        // Show winners section if March is selected
+        if (currentMonth === 'march') {
+            document.getElementById('winnersSection').style.display = 'block';
+        }
     }
 
     // Start the application
