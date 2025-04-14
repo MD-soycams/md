@@ -416,18 +416,18 @@
             prizes: 1000,
             sinkingFunds: 2500,
             prizeStructure: {
-                first: 500  ,
+                first: 500,
                 second: 200,
                 consolation: 100,
                 consolationCount: 3
             }
         },
         april: {
-            totalSlots: 100,
+            totalSlots: 70,
             slotPrice: 50,
-            totalAmount: 5000,
-            Cash Prizes: 500,
-            sinkingFunds: 4500,
+            totalAmount: 3500,
+            prizes: 1000,
+            sinkingFunds: 2500,
             prizeStructure: {
                 first: 500,
                 second: 200,
@@ -436,11 +436,11 @@
             }
         },
         may: {
-            totalSlots: 100,
+            totalSlots: 70,
             slotPrice: 50,
-            totalAmount: 5000,
-            prizes: 500,
-            sinkingFunds: 4500,
+            totalAmount: 3500,
+            prizes: 1000,
+            sinkingFunds: 2500,
             prizeStructure: {
                 first: 500,
                 second: 200,
@@ -453,7 +453,7 @@
             slotPrice: 100,
             totalAmount: 10000,
             prizes: 2000,
-            sinkingFunds: 8000,
+            sinkingFunds: 3000,
             prizeStructure: {
                 first: 1000,
                 second: 400,
@@ -513,10 +513,10 @@
         
         // Update prize details
         document.getElementById('prizeDetails').innerHTML = `
-            <p>Total Slots: ${config.totalSlots}</p>
-            <p>${config.slotPrice} AED per slot: ${config.totalAmount} AED</p>
-            <p>Prizes: ${config.prizes} AED</p>
-            <p>MD Sinking Funds: ${config.sinkingFunds} AED</p>
+            <p>Total Slots - ${config.totalSlots}</p>
+            <p>${config.slotPrice} AED per slot = ${config.totalAmount} AED</p>
+            <p>Prizes = ${config.prizes} AED</p>
+            <p>MD Sinking Funds = ${config.sinkingFunds} AED</p>
         `;
     }
 
