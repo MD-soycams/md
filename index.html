@@ -546,11 +546,22 @@
                 updateParticipantsTable();
                 
                 // Show/hide winners section
-                if (currentMonth === 'march') {
-                    document.getElementById('winnersSection').style.display = 'block';
-                } else {
-                    document.getElementById('winnersSection').style.display = 'none';
-                }
+const winnersSection = document.getElementById('winnersSection');
+const marchWinners = document.getElementById('marchWinners');
+const aprilWinners = document.getElementById('aprilWinners');
+
+winnersSection.style.display = 'none';
+marchWinners.style.display = 'none';
+aprilWinners.style.display = 'none';
+
+if (currentMonth === 'march') {
+    winnersSection.style.display = 'block';
+    marchWinners.style.display = 'block';
+} else if (currentMonth === 'april') {
+    winnersSection.style.display = 'block';
+    aprilWinners.style.display = 'block';
+}
+
             });
         });
     }
